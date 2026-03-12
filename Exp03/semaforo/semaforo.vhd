@@ -41,7 +41,7 @@ architecture arch of semaforo is
 	end component;
 
 
-   signal en_verm, en_amar, en_verd     : std_logic;
+   signal en_verm,  en_amar,  en_verd   : std_logic;
    signal clr_verm, clr_amar, clr_verd  : std_logic;
 	signal rco_verm, rco_amar, rco_verd  : std_logic;
 	
@@ -67,7 +67,7 @@ begin
          clock  => clock,
          clear  => clr_verm,
          enable => en_verm,
-         Q      => -------,
+         Q      => open,
          RCO    => rco_verm
       );
 
@@ -77,7 +77,7 @@ begin
          clock  => clock,
          clear  => clr_verd,
          enable => en_verd,
-         Q      => -------,
+         Q      => open,
          RCO    => rco_verd
       );
 
@@ -87,12 +87,17 @@ begin
 			clock  => clock,
 			clear  => clr_amar,
 			enable => en_amar,
-			Q      => -------,
+			Q      => open,
 			RCO    => rco_amar
       );
+		
+	vermelho <= en_verm;
+	amarelo  <= en_amar;
+   verde    <= en_verd;
 --------------------------------------------------------------------------Algumas divagações--
--- posso estar sendo muito burro, mas n sei o que devo colocar na saída Q de cada contador. --
--- porque por exemplo, o semáforo não mostra nada além do LED que é controlado pelo tempo   --
+-- Posso estar sendo muito burro, mas n sei o que devo colocar na saída Q de cada contador. --
+-- Porque por exemplo, o semáforo não mostra nada além do LED que é controlado pelo tempo   --
 -- interno do contador, mas não utiliza nenhuma saída para usar a saída do contador.        --
+-- Talvez tenha alguma relação com as saídas do semáforo (vermelho, amarelo e verde).       --
 ----------------------------------------------------------------------------------------------
 end architecture;
