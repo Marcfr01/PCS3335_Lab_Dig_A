@@ -4,11 +4,17 @@ use ieee.numeric_std.all;
 
 entity semaforo is
 	port (
-		clock 	: in std_logic;
-		reset 	: in std_logic;
+		clock 	 : in std_logic;
+		reset 	 : in std_logic;
 		vermelho : out std_logic;
-		amarelo 	: out std_logic;
-		verde 	: out std_logic);
+		amarelo  : out std_logic;
+		verde 	 : out std_logic
+	
+		-- Desafio: implementar em um LED RGB
+		cor_vermelha : out std_logic;
+		cor_verde    : out std_logic
+		cor_azul     : out std_logic;
+	);
 end entity semaforo;
 
 architecture arch of semaforo is
@@ -93,11 +99,9 @@ begin
 		
 	vermelho <= en_verm;
 	amarelo  <= en_amar;
-   verde    <= en_verd;
---------------------------------------------------------------------------Algumas divagações--
--- Posso estar sendo muito burro, mas n sei o que devo colocar na saída Q de cada contador. --
--- Porque por exemplo, o semáforo não mostra nada além do LED que é controlado pelo tempo   --
--- interno do contador, mas não utiliza nenhuma saída para usar a saída do contador.        --
--- Talvez tenha alguma relação com as saídas do semáforo (vermelho, amarelo e verde).       --
-----------------------------------------------------------------------------------------------
+	verde    <= en_verd;
+
+	cor_veremlha <= '1' when ((en_verm or en_amarela) = '1'), else '0';
+	cor_verde    <= '1' when ((en_verd or en_amarela) = '1'), else '0';
+	cor_azul     <= '0' -- Não utilizada para as cores do semáforo
 end architecture;
