@@ -6,6 +6,7 @@
 --   CASO 4 – Pulso mais longo (~20 ciclos de clock)
 --   CASO 5 – Segunda medição consecutiva sem desligar LIGA
 --   CASO 6 – Desligar e religar (LIGA vai a 0 e volta a 1)
+--   CASO 7 - Contagem ultrapassa 9999, ativando o sinal de fim
 --
 -- =============================================================================
 
@@ -61,6 +62,9 @@ architecture simulacao of medidor_largura_tb is
     signal db_sinal_tb     : std_logic;
     signal db_zeraCont_tb  : std_logic;
     signal db_contaCont_tb : std_logic;
+	 
+	 -- Caso de teste
+	 signal caso            : integer := 0;
 
 begin
 
@@ -95,6 +99,7 @@ begin
 		
 		-- CASO 1: Reset inicial
 		-- Esperado: sistema vai para estado INICIAL, zeraCont=0, contaCont=0
+		caso <= 1;
 		reset_tb <= '1';
 		liga_tb  <= '0';
 		sinal_tb <= '0';
@@ -105,6 +110,7 @@ begin
 		-- CASO 2: LIGA=0 – sistema permanece em INICIAL
 		-- Aplica pulso em SINAL sem ligar o sistema
 		-- Esperado: nenhuma contagem, estado permanece INICIAL
+		caso <= 2;
 		sinal_tb <= '1';
 		wait for 5 * PERIODO_CLOCK;
 		sinal_tb <= '0';
@@ -113,6 +119,7 @@ begin
 		-- CASO 3: Pulso curto (~5 ciclos)
 		-- Sequência: LIGA=1 → espera PREPARA (zeraCont=1) → SINAL=1 por 5 ciclos
 		-- Esperado: contagem = 5, PRONTO pulsa ao final
+		caso <= 3;
 		liga_tb  <= '1';
 		wait for 3 * PERIODO_CLOCK;   -- estado LIGADO (aguarda borda do sinal)
 	
@@ -120,19 +127,21 @@ begin
 		wait for 5 * PERIODO_CLOCK;   -- pulso dura 5 ciclos
 		sinal_tb <= '0';              -- fim do pulso → FIM (PRONTO=1) → ESPERA
 	
-		wait for until falling_edge(clock_tb);  -- aguarda estabilização
+		wait until falling_edge(clock_tb);  -- aguarda estabilização
 
 		-- CASO 4: Pulso mais longo (20 ciclos)
 		-- Sistema em ESPERA com LIGA=1 aguarda novo pulso
 		-- Esperado: contagem = 20, PRONTO pulsa ao final
+		caso <= 4;
 		sinal_tb <= '1';
 		wait for 20 * PERIODO_CLOCK;
 		sinal_tb <= '0';
-		wait for until falling_edge(clock_tb);
+		wait until falling_edge(clock_tb);
 	
 		-- CASO 5: Segunda medição consecutiva sem desligar LIGA
 		-- Sistema em ESPERA; aplica novo pulso imediatamente
 		-- Esperado: nova medição (contador zerado antes), resultado = 10
+		caso <= 5;
       sinal_tb <= '1';
       wait for 10 * PERIODO_CLOCK;
       sinal_tb <= '0';
@@ -141,6 +150,7 @@ begin
       -- CASO 6: Desligar e religar o sistema
       -- LIGA vai a 0 → estado INICIAL; LIGA volta a 1 → nova medição
       -- Esperado: ao voltar LIGA=1 e aplicar SINAL, medição reinicia do zero
+		caso <= 6;
       liga_tb  <= '0';
       wait for 5 * PERIODO_CLOCK;  -- deve ir para INICIAL
 
@@ -151,8 +161,16 @@ begin
       wait for 8 * PERIODO_CLOCK;
       sinal_tb <= '0';
       wait until falling_edge(clock_tb);
+		
+		-- CASO 7 - Contagem ultrapassa 9999, ativando o sinal de fim
+		caso <= 7;
+		sinal_tb <= '1';
+		wait for 10002 * PERIODO_CLOCK;
+		sinal_tb <= '0';
+		wait until falling_edge(clock_tb);
 
       -- Fim da simulação
+		caso <= 99;
       wait for 10 * PERIODO_CLOCK;
       report "=== Simulacao concluida com sucesso ===" severity note;
 		keep_simulating <= '0';
