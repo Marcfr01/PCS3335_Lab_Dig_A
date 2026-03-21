@@ -140,7 +140,7 @@ begin
 	
 		-- CASO 5: Segunda medição consecutiva sem desligar LIGA
 		-- Sistema em ESPERA; aplica novo pulso imediatamente
-		-- Esperado: nova medição (contador zerado antes), resultado = 10
+		-- Esperado: nova medição (contador zerado antes), resultado = 10-2
 		caso <= 5;
       sinal_tb <= '1';
       wait for 10 * PERIODO_CLOCK;
