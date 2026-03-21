@@ -38,7 +38,7 @@ begin
 					  CONTA   when (estado_atual = PREPARA) else 
 					  CONTA   when (estado_atual = CONTA   and sinal = '1') else 
 					  FIM     when (estado_atual = CONTA   and sinal = '0') else 
-					  ESPERA  when (estado_atual = FIM     and sinal = '1') else 
+					  ESPERA  when (estado_atual = FIM) else 
 					  ESPERA  when (estado_atual = ESPERA  and (sinal = '0' and liga = '1')) else 
 					  estado_atual;
 						
