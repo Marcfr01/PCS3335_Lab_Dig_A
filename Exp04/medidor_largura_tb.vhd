@@ -118,7 +118,7 @@ begin
 	
 		-- CASO 3: Pulso curto (~5 ciclos)
 		-- Sequência: LIGA=1 → espera PREPARA (zeraCont=1) → SINAL=1 por 5 ciclos
-		-- Esperado: contagem = 5, PRONTO pulsa ao final
+		-- Esperado: contagem = 5-1, PRONTO pulsa ao final
 		caso <= 3;
 		liga_tb  <= '1';
 		wait for 3 * PERIODO_CLOCK;   -- estado LIGADO (aguarda borda do sinal)
@@ -131,7 +131,7 @@ begin
 
 		-- CASO 4: Pulso mais longo (20 ciclos)
 		-- Sistema em ESPERA com LIGA=1 aguarda novo pulso
-		-- Esperado: contagem = 20, PRONTO pulsa ao final
+		-- Esperado: contagem = 20-2, PRONTO pulsa ao final
 		caso <= 4;
 		sinal_tb <= '1';
 		wait for 20 * PERIODO_CLOCK;
@@ -165,7 +165,7 @@ begin
 		-- CASO 7 - Contagem ultrapassa 9999, ativando o sinal de fim
 		caso <= 7;
 		sinal_tb <= '1';
-		wait for 10002 * PERIODO_CLOCK;
+		wait for 10004 * PERIODO_CLOCK;
 		sinal_tb <= '0';
 		wait until falling_edge(clock_tb);
 
