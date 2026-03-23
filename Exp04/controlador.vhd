@@ -2,57 +2,116 @@ library ieee;
 use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
-entity controlador is 
-	port( 
-		clock 	 : in  std_logic;
-		reset 	 : in  std_logic;
-		liga 		 : in  std_logic;
-		sinal 	 : in  std_logic;
+entity medidor_largura is
+	 port (
+		clock : in std_logic;
+		reset : in std_logic;
+		liga : in std_logic;
+		sinal : in std_logic;
+		erro  : out std_logic;
+		display0 : out std_logic_vector(6 downto 0);
+		display1 : out std_logic_vector(6 downto 0);
+		display2 : out std_logic_vector(6 downto 0);
+		display3 : out std_logic_vector(6 downto 0);
+		db_estado : out std_logic_vector(6 downto 0);
+		pronto : out std_logic;
+		fim : out std_logic;
+		db_clock : out std_logic;
+		db_sinal : out std_logic;
+		db_zeraCont : out std_logic;
+		db_contaCont : out std_logic
+	 );
+end entity medidor_largura;
+
+architecture arch of medidor_largura is
+	
+	--declaracoes dos componentes utilizados
+	component controlador is
+	 port (
+		clock 	 : in std_logic;
+		reset 	 : in std_logic;
+		liga 		 : in std_logic;
+		sinal 	 : in std_logic;
+		ov    	 : in  std_logic;
+		error		 : out std_logic;
 		zeraCont  : out std_logic;
 		contaCont : out std_logic;
-		pronto 	 : out std_logic;
-		db_estado : out std_logic_vector(3 downto 0) -- sinal de depuracao
-	);
-end entity;
-
-architecture arch of controlador is 
-	type estados is (INICIAL, LIGADO, PREPARA, CONTA, FIM, ESPERA);
-	signal estado_atual, proximo_estado : estados;
+		pronto    : out std_logic;
+		db_estado : out std_logic_vector(3 downto 0) 
+	 );
+	end component;
 	
-begin
-	
-	process(clock, reset)
+	component cont10_4digitos_7seg is
+	 port (
+		clock 		: in std_logic;
+		clear 		: in std_logic;
+		enable   	: in std_logic;
+		Q0				: out std_logic_vector(6 downto 0);
+		Q1				: out std_logic_vector(6 downto 0);
+		Q2				: out std_logic_vector(6 downto 0);
+		Q3          : out std_logic_vector(6 downto 0);
+		RCO 	      : out std_logic);
+	 end component;
+	 
+	 component hex7seg is
+		port (  
+				hex      : in  std_logic_vector(3 downto 0);
+				display  : out std_logic_vector(6 downto 0)
+		);
+	  end component;
+	 
+	 -- sinais de controle para o contador
+	 signal zerar, contar : std_logic := '0';
+	 
+	 --DESAFIO
+	 signal fim2, paia : std_logic := '0';
+	 
+	 --si
+	 signal db_estado_hex : std_logic_vector(3 downto 0) := (others => '0');
+	 --sinais de saida do contador, em 4 bits
+	 --signal q0, q1, q2, q3 : std_logic_vector(3 downto 0) := (others => '0');
+	 
 	begin
-		if reset = '1' then estado_atual <= INICIAL;
-		elsif clock'event and clock = '1' then estado_atual <= proximo_estado;
-		end if;
-	end process;
-	
-	-- Lógica de próximo estado
-	proximo_estado <= INICIAL when (estado_atual = INICIAL and liga  = '0') else 
-					  INICIAL when (estado_atual = ESPERA  and liga  = '0') else 
-					  LIGADO  when (estado_atual = INICIAL and liga  = '1') else
-					  LIGADO  when (estado_atual = LIGADO  and sinal = '0') else 
-					  PREPARA when (estado_atual = LIGADO  and sinal = '1') else 
-					  PREPARA when (estado_atual = ESPERA  and (sinal = '1' and liga = '1')) else 
-					  CONTA   when (estado_atual = PREPARA) else 
-					  CONTA   when (estado_atual = CONTA   and sinal = '1') else 
-					  FIM     when (estado_atual = CONTA   and sinal = '0') else 
-					  ESPERA  when (estado_atual = FIM) else 
-					  ESPERA  when (estado_atual = ESPERA  and (sinal = '0' and liga = '1')) else 
-					  estado_atual;
-						
-	-- Saídas 
-	with estado_atual select zeraCont   <= '1' when PREPARA, '0' when others;
-	with estado_atual select contaCont 	<= '1' when CONTA, 	 '0' when others;
-	with estado_atual select pronto     <= '1' when FIM, 	 '0' when others;
-	
-	db_estado <= "0001" when (estado_atual = INICIAL) else
-                 "0010" when (estado_atual = LIGADO)  else
-                 "0011" when (estado_atual = PREPARA) else
-                 "0100" when (estado_atual = CONTA)   else
-                 "0101" when (estado_atual = FIM)     else
-                 "0110" when (estado_atual = ESPERA)  else
-                 "0000";
+		
+		contr : controlador 
+			port map(
+				clock 	 => clock,
+				reset 	 => reset,
+				liga 		 => liga,
+				sinal 	 => sinal,
+				ov 		 => fim2,
+				error   	 => paia,
+				zeraCont  => zerar,
+				contaCont => contar,
+				pronto    => pronto,
+				db_estado => db_estado_hex
+				);
+				
+		contador : cont10_4digitos_7seg
+			port map(
+				clock   	=>  clock, 
+				clear   	=>  zerar,
+				enable  	=>  contar,
+				Q0       =>  display0,
+				Q1       =>  display1,
+				Q2       =>  display2,
+				Q3       =>  display3,
+				RCO     	=>  fim2
+				);
+		
+		conversor : hex7seg
+			port map(
+				hex 		=> db_estado_hex,
+				display  => db_estado
+			);
+			
+		fim <= fim2;
+		erro <= paia;
+		
+		--atribuicoes dos sinais de depuracao
+		db_clock 	 <= clock;
+		db_sinal 	 <= sinal;
+		db_zeraCont  <= zerar;
+		db_contaCont <= contar;
 	
 end architecture;
