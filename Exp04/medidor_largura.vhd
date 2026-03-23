@@ -8,6 +8,7 @@ entity medidor_largura is
 		reset : in std_logic;
 		liga : in std_logic;
 		sinal : in std_logic;
+		erro  : out std_logic;
 		display0 : out std_logic_vector(6 downto 0);
 		display1 : out std_logic_vector(6 downto 0);
 		display2 : out std_logic_vector(6 downto 0);
@@ -31,6 +32,8 @@ architecture arch of medidor_largura is
 		reset 	 : in std_logic;
 		liga 		 : in std_logic;
 		sinal 	 : in std_logic;
+		ov    	 : in  std_logic;
+		error		 : out std_logic;
 		zeraCont  : out std_logic;
 		contaCont : out std_logic;
 		pronto    : out std_logic;
@@ -60,6 +63,9 @@ architecture arch of medidor_largura is
 	 -- sinais de controle para o contador
 	 signal zerar, contar : std_logic := '0';
 	 
+	 --DESAFIO
+	 signal fim2, paia : std_logic := '0';
+	 
 	 --si
 	 signal db_estado_hex : std_logic_vector(3 downto 0) := (others => '0');
 	 --sinais de saida do contador, em 4 bits
@@ -73,6 +79,8 @@ architecture arch of medidor_largura is
 				reset 	 => reset,
 				liga 		 => liga,
 				sinal 	 => sinal,
+				ov 		 => fim2,
+				error   	 => paia,
 				zeraCont  => zerar,
 				contaCont => contar,
 				pronto    => pronto,
@@ -88,7 +96,7 @@ architecture arch of medidor_largura is
 				Q1       =>  display1,
 				Q2       =>  display2,
 				Q3       =>  display3,
-				RCO     	=>  fim
+				RCO     	=>  fim2
 				);
 		
 		conversor : hex7seg
@@ -96,6 +104,9 @@ architecture arch of medidor_largura is
 				hex 		=> db_estado_hex,
 				display  => db_estado
 			);
+			
+		fim <= fim2;
+		erro <= paia;
 		
 		--atribuicoes dos sinais de depuracao
 		db_clock 	 <= clock;
@@ -104,14 +115,3 @@ architecture arch of medidor_largura is
 		db_contaCont <= contar;
 	
 end architecture;
-				
-		
-	
-	
-	
-	
-	
-	
-	
-	
-	
