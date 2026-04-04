@@ -15,6 +15,8 @@ entity UC is
  --pulso : out std_logic;
  erro : out std_logic;
  pronto : out std_logic;
+ contar : out std_logic;
+ clr_contador : out std_logic;
  db_estado : out std_logic_vector(3 downto 0) 
  );
 end entity UC;
@@ -50,10 +52,12 @@ architecture arch of UC is
 		
 		
 			-- Saídas 
-			with estado_atual select ligado 	  <= '0' when (INICIAL or ERRO), 	'1' when others;
-			with estado_atual select estimulo  <= '1' when ESTIMULO, 				'0' when others;
-			with estado_atual select erro      <= '1' when ERRO, 	   				'0' when others;
-			with estado_atual select pronto    <= '1' when FIM, 	   				'0' when others;
+			with estado_atual select ligado 	        <= '0' when (INICIAL or ERRO), 	'1' when others;
+			with estado_atual select estimulo        <= '1' when ESTIMULO, 				'0' when others;
+			with estado_atual select erro            <= '1' when ERRO, 	   				'0' when others;
+			with estado_atual select pronto          <= '1' when FIM, 	   				'0' when others;
+			with estado_atual select contar    		  <= '1' when PREPARA, 	   			'0' when others;
+			with estado_atual select clr_contador    <= '0' when PREPARA, 	   			'1' when others;
 			 
 			db_estado <=  "0001" when (estado_atual = INICIAL) else
 							  "0010" when (estado_atual = PREPARA) else
