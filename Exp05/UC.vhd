@@ -20,7 +20,7 @@ entity UC is
 end entity UC;
 
 architecture arch of UC is 
-	type estados is (INICIAL, PREPARA, ESTIMULA, ERRO, FIM);
+	type estados is (INICIAL, PREPARA, ESTIMULA, ERRO, FIM, ESPERA);
 	signal estado_atual, proximo_estado : estados;
 	
 	begin
@@ -40,8 +40,12 @@ architecture arch of UC is
 							   ESTIMULA when (estado_atual = PREPARA and passou10 = '1' and resposta ='0') else
 							   ESTIMULA when (estado_atual = ESTIMULA and resposta = '0') else
 							   FIM when (estado_atual = ESTIMULA and resposta = '1') else
-								FIM when (estado_atual = FIM and resposta = '1')
-								INICIAL when (estado_atual = FIM and resposta = '0')
+								INICIAL when (estado_atual = FIM and resposta = '0') else
+								ESPERA when (estado_atual = FIM and resposta = '1') else
+								ESPERA when (estado_atual = ESPERA and resposta = '1') else
+								INICIAL when (estado_atual = ESPERA and resposta = '0') else
+								ERRO when (estado_atual = ERRO and resposta = '1') else
+								INICIAL when (estado_atual = ERRO and resposta = '0') else
 							   estado_atual; 
 		
 		
@@ -55,7 +59,8 @@ architecture arch of UC is
 							  "0010" when (estado_atual = PREPARA) else
 							  "0011" when (estado_atual = ESTIMULA)   else
 							  "0100" when (estado_atual = FIM)     else
-							  "0101" when (estado_atual = ERRO) else
+							  "0101" when (estado_atual = ESPERA) else
+							  "0110" when (estado_atual = ERRO) else
 							  "0000";
 							  
 end architecture;
