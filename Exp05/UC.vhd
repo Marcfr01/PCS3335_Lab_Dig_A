@@ -17,12 +17,12 @@ entity UC is
  pronto : out std_logic;
  contar : out std_logic;
  clr_contador : out std_logic;
- db_estado : out std_logic_vector(3 downto 0) 
+ db_estado_atual : out std_logic_vector(3 downto 0) 
  );
 end entity UC;
 
 architecture arch of UC is 
-	type estados is (INICIAL, PREPARA, ESTIMULA, ERRO, FIM, ESPERA);
+	type estados is (INICIAL, PREPARA, ESTIMULA, ERROR, FIM, ESPERA);
 	signal estado_atual, proximo_estado : estados;
 	
 	begin
@@ -37,7 +37,7 @@ architecture arch of UC is
 	   --logica de proximo estado
 		proximo_estado <= INICIAL when (estado_atual = INICIAL and iniciar  = '0') else 
 							   PREPARA  when (estado_atual = INICIAL and iniciar  = '1') else
-								ERRO when (estado_atual = PREPARA and resposta = '1') else
+								ERROR when (estado_atual = PREPARA and resposta = '1') else
 							   PREPARA  when (estado_atual = PREPARA and passou10 = '0' and resposta ='0') else
 							   ESTIMULA when (estado_atual = PREPARA and passou10 = '1' and resposta ='0') else
 							   ESTIMULA when (estado_atual = ESTIMULA and resposta = '0') else
@@ -46,25 +46,29 @@ architecture arch of UC is
 								ESPERA when (estado_atual = FIM and resposta = '1') else
 								ESPERA when (estado_atual = ESPERA and resposta = '1') else
 								INICIAL when (estado_atual = ESPERA and resposta = '0') else
-								ERRO when (estado_atual = ERRO and resposta = '1') else
-								INICIAL when (estado_atual = ERRO and resposta = '0') else
+								ERROR when (estado_atual = ERROR and resposta = '1') else
+								INICIAL when (estado_atual = ERROR and resposta = '0') else
 							   estado_atual; 
 		
 		
 			-- Saídas 
-			with estado_atual select ligado 	        <= '0' when (INICIAL or ERRO), 	'1' when others;
-			with estado_atual select estimulo        <= '1' when ESTIMULO, 				'0' when others;
-			with estado_atual select erro            <= '1' when ERRO, 	   				'0' when others;
+			
+			ligado <= '0' when (estado_atual = INICIAL) else
+						 '0' when (estado_atual = ERROR) else
+						 '1';
+						 
+			with estado_atual select estimulo        <= '1' when ESTIMULA, 				'0' when others;
+			with estado_atual select erro            <= '1' when ERROR, 	   				'0' when others;
 			with estado_atual select pronto          <= '1' when FIM, 	   				'0' when others;
 			with estado_atual select contar    		  <= '1' when PREPARA, 	   			'0' when others;
 			with estado_atual select clr_contador    <= '0' when PREPARA, 	   			'1' when others;
 			 
-			db_estado <=  "0001" when (estado_atual = INICIAL) else
-							  "0010" when (estado_atual = PREPARA) else
-							  "0011" when (estado_atual = ESTIMULA)   else
-							  "0100" when (estado_atual = FIM)     else
-							  "0101" when (estado_atual = ESPERA) else
-							  "0110" when (estado_atual = ERRO) else
-							  "0000";
+			db_estado_atual <=  "0001" when (estado_atual = INICIAL) else
+									  "0010" when (estado_atual = PREPARA) else
+									  "0011" when (estado_atual = ESTIMULA)   else
+									  "0100" when (estado_atual = FIM)     else
+									  "0101" when (estado_atual = ESPERA) else
+									  "0110" when (estado_atual = ERROR) else
+									  "0000";
 							  
 end architecture;
