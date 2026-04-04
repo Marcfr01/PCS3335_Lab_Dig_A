@@ -25,15 +25,16 @@ architecture sim of tb_interface_leds_botoes is
     -- Componente sob teste
     component interface_leds_botoes is
         port (
-            clock    : in  std_logic;
-            reset    : in  std_logic;
-            iniciar  : in  std_logic;
-            resposta : in  std_logic;
-            ligado   : out std_logic;
-            estimulo : out std_logic;
-            pulso    : out std_logic;
-            erro     : out std_logic;
-            pronto   : out std_logic
+            clock     : in  std_logic;
+            reset     : in  std_logic;
+            iniciar   : in  std_logic;
+            resposta  : in  std_logic;
+            ligado    : out std_logic;
+            estimulo  : out std_logic;
+            pulso     : out std_logic;
+            erro      : out std_logic;
+            pronto    : out std_logic;
+				db_estado : out std_logic_vector(3 downto 0)
         );
     end component;
 
@@ -44,11 +45,15 @@ architecture sim of tb_interface_leds_botoes is
     signal resposta_tb : std_logic := '0';
 
     -- Sinais de observacao (saidas do DUT)
-    signal ligado_tb   : std_logic;
-    signal estimulo_tb : std_logic;
-    signal pulso_tb    : std_logic;
-    signal erro_tb     : std_logic;
-    signal pronto_tb   : std_logic;
+    signal ligado_tb    : std_logic;
+    signal estimulo_tb  : std_logic;
+    signal pulso_tb     : std_logic;
+    signal erro_tb      : std_logic;
+    signal pronto_tb    : std_logic;
+	 signal db_estado_tb : std_logic_vector(3 downto 0);
+	 
+	 -- Indicador do caso de teste
+	 signal caso : integer := 0;
 
     -- Controle de simulacao
     signal keep_simulating : std_logic := '1';
@@ -66,15 +71,16 @@ begin
     -- Instancia do DUT
     DUT: interface_leds_botoes
         port map (
-            clock    => clock_tb,
-            reset    => reset_tb,
-            iniciar  => iniciar_tb,
-            resposta => resposta_tb,
-            ligado   => ligado_tb,
-            estimulo => estimulo_tb,
-            pulso    => pulso_tb,
-            erro     => erro_tb,
-            pronto   => pronto_tb
+            clock     => clock_tb,
+            reset     => reset_tb,
+            iniciar   => iniciar_tb,
+            resposta  => resposta_tb,
+            ligado    => ligado_tb,
+            estimulo  => estimulo_tb,
+            pulso     => pulso_tb,
+            erro      => erro_tb,
+            pronto    => pronto_tb,
+				db_estado => db_estado_tb
         );
 
     -- Processo de estimulacao
@@ -95,6 +101,8 @@ begin
         -- Esperado: todas as saidas em '0'
         -- ======================================================
         report "=== TC1: Reset no estado INICIAL ===" severity note;
+		  
+		  caso <= 1;
 
         reset_tb   <= '1';
         iniciar_tb <= '0';
@@ -114,6 +122,8 @@ begin
         -- Esperado: ligado=1, estimulo=0, erro=0
         -- ======================================================
         report "=== TC2: INICIAL -> PREPARA ===" severity note;
+		  
+		  caso <= 2;
 
         iniciar_tb <= '1';
         wait_clocks(1);
@@ -138,6 +148,8 @@ begin
         -- Esperado: estimulo=1, ligado=1, erro=0
         -- ======================================================
         report "=== TC3: PREPARA -> ESTIMULA (10000 clocks) ===" severity note;
+		  
+		  caso <= 3;
 
         iniciar_tb  <= '1';
         resposta_tb <= '0';
@@ -165,6 +177,8 @@ begin
         -- Esperado: erro=1, estimulo=0, ligado=0
         -- ======================================================
         report "=== TC4: PREPARA -> ERROR ===" severity note;
+		  
+		  caso <= 4;
 
         iniciar_tb  <= '1';
         resposta_tb <= '0';
@@ -190,6 +204,8 @@ begin
         -- Esperado: pronto=1, estimulo=0
         -- ======================================================
         report "=== TC5: ESTIMULA -> FIM ===" severity note;
+		  
+		  caso <= 5;
 
         iniciar_tb  <= '1';
         resposta_tb <= '0';
@@ -213,6 +229,8 @@ begin
         --           ao soltar resposta, volta ao INICIAL
         -- ======================================================
         report "=== TC6: FIM -> ESPERA ===" severity note;
+		  
+		  caso <= 6;
 
         -- resposta ainda esta em '1' (vindo do TC5), forcando FIM -> ESPERA
         wait_clocks(1);
@@ -238,6 +256,8 @@ begin
         -- Esperado: estimulo=1 e circuito estavel em ESTIMULA
         -- ======================================================
         report "=== TC7: Contagem longa (contador ultrapassa MODULO) ===" severity note;
+		  
+		  caso <= 7;
 
         iniciar_tb  <= '1';
         resposta_tb <= '0';
@@ -260,6 +280,9 @@ begin
         -- ======================================================
         -- FIM DA SIMULACAO
         -- ======================================================
+		  
+		  caso <= 99;
+		  
         reset_tb <= '1';
         wait_clocks(2);
         reset_tb <= '0';
