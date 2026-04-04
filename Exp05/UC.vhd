@@ -15,7 +15,7 @@ entity UC is
  --pulso : out std_logic;
  erro : out std_logic;
  pronto : out std_logic;
- db_estado : out std_logic
+ db_estado : out std_logic_vector(3 downto 0) 
  );
 end entity UC;
 
