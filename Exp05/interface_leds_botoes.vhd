@@ -1,3 +1,8 @@
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+
 entity interface_leds_botoes is
  port (
  clock : in std_logic;
@@ -8,11 +13,12 @@ entity interface_leds_botoes is
  estimulo : out std_logic;
  pulso : out std_logic;
  erro : out std_logic;
- pronto : out std_logic
+ pronto : out std_logic;
+ db_estado : out std_logic_vector(3 downto 0)
  );
 end entity interface_leds_botoes;
 
-architecture arch of interface_led_botoes is
+architecture arch of interface_leds_botoes is
 
 	--declaracoes dos componentes utilizados
 	
@@ -30,7 +36,7 @@ architecture arch of interface_led_botoes is
 		 pronto : out std_logic;
 		 contar : out std_logic;
 		 clr_contador : out std_logic;
-		 db_estado : out std_logic_vector(3 downto 0) 
+		 db_estado_atual : out std_logic_vector(3 downto 0) 
 	 );
 	end component;
 	
@@ -47,13 +53,13 @@ architecture arch of interface_led_botoes is
 	end component;
 	
 	-- declaracao de sinais
-	signal passou10, clr_cont, en_cont : std_logic := '0';
-	signal db_estado : std_logic_vector;
+	signal passou10, clr_cont, en_cont, temp_estimulo	: std_logic := '0';
+	signal db_estado_atual : std_logic_vector(3 downto 0);
 	
 	begin
 	
 		CONT : contador
-			generic map (MODULO => 10000)
+			generic map (MODULO => 10)
 			port map (
 				clock  => clock,
 				clear  => clr_cont,
@@ -64,19 +70,27 @@ architecture arch of interface_led_botoes is
 		
 		Unid_Controle : UC
 			port map(
-				clock      	  => clock
-				reset  	  	  => reset
-				iniciar 	  	  => iniciar
-				resposta   	  => resposta
-				passou10   	  => passou10
-				ligado 	  	  => ligado
-				estimulo   	  => estimulo
+				clock      	    => clock,
+				reset  	  	    => reset,
+				iniciar 	  	    => iniciar,
+				resposta   	    => resposta,
+				passou10   	    => passou10,
+				ligado 	  	    => ligado,
+				estimulo   	    => temp_estimulo,
 				--pulso : out std_logic;
-				erro 		  	  => erro
-				pronto     	  => pronto
-				contar     	  => en_cont
-				clr_contador  => clr_cont
-				db_estado  	  => db_estado
+				erro 		  	    => erro,
+				pronto     	    => pronto,
+				contar     	    => en_cont,
+				clr_contador    => clr_cont,
+				db_estado_atual => db_estado_atual
 			);
+		
+		-- pulso assincrono
+		pulso <= '1' when (temp_estimulo = '1' and resposta = '0') else
+					 '0';
 
+		estimulo <= temp_estimulo;
+		
+		db_estado <= db_estado_atual;
+		
 end architecture;
