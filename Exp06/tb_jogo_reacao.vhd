@@ -88,7 +88,7 @@ begin
 				display0  => display0_tb,
 				display1  => display1_tb,
 				display2  => display2_tb,
-				display3  => display3_tb
+				display3  => display3_tb,
             ligado    => ligado_tb,
             pulso     => pulso_tb,
             estimulo  => estimulo_tb,
@@ -232,7 +232,7 @@ begin
         jogar_tb <= '0';
 
         wait until estimulo_tb = '1';
-        wait_clocks(15');   -- permanece alguns ciclos em ESTIMULA
+        wait_clocks(15);   -- permanece alguns ciclos em ESTIMULA
 
         resposta_tb <= '1';   -- jogador responde
         wait_clocks(1);
