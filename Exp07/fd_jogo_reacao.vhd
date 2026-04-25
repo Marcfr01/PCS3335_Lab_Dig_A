@@ -50,6 +50,8 @@ entity fd_jogo_reacao is
         display1      : out std_logic_vector(6 downto 0);
         display2      : out std_logic_vector(6 downto 0);
         display3      : out std_logic_vector(6 downto 0);
+		  db_latch_a    : out std_logic_vector(2 downto 0);
+		  db_latch_b   : out std_logic_vector(2 downto 0);
         db_tempo      : out std_logic_vector(15 downto 0)
     );
 end entity fd_jogo_reacao;
@@ -111,7 +113,8 @@ architecture arch of fd_jogo_reacao is
     -- =========================================================================
     -- Sinais internos: Canal A e Canal B
     -- =========================================================================
-    signal s_tick_a   : std_logic;
+    signal enableA    : std_logic;
+	 signal s_tick_a   : std_logic;
     signal s_q_secs_a : std_logic_vector(14 downto 0);
 
     signal s_tick_b   : std_logic;
@@ -190,7 +193,8 @@ begin
                 else '0' & latch_b(2 downto 1);         -- shift right 1
 
     -- B1: tem_falso = '1' quando M_rand e impar (LSB = '1')
-    tem_falso <= latch_b(0);
+    tem_falso <= latch_b(0) when unsigned(latch_a) > unsigned(metade_b) else
+						'0';
 
     -- =========================================================================
     -- Canal A: contagem de segundos em PREPARA e PREPARA2
@@ -208,7 +212,7 @@ begin
         port map (
             clock  => clock,
             clear  => clr_espera,
-            enable => contar_espera,
+            enable => enableA, 
             Q      => open,
             RCO    => s_tick_a
         );
@@ -222,9 +226,12 @@ begin
             Q      => s_q_secs_a,
             RCO    => open
         );
-
+	
+	 -- enable do contador A recebe 1 quando em PREPARA ou PREPARA2 e para de contar em FALSO_ALARME (mas mantem seu valor)
+	 enableA 	  <= '1' when (contar_espera = '1') and (contar_falso = '0') else
+						  '0';  
     -- A2: passou N_rand segundos em PREPARA (rota sem alarme falso)
-    passou_rand  <= '1' when unsigned(s_q_secs_a(2 downto 0)) >= unsigned(latch_a) else '0';
+    passou_rand  <= '1' when unsigned(s_q_secs_a) >= unsigned(latch_a) else '0';
 
     -- B1: passou M_rand segundos em PREPARA (hora de ativar alarme falso)
     passou_falso <= '1' when unsigned(s_q_secs_a(2 downto 0)) >= unsigned(latch_b) else '0';
@@ -325,5 +332,7 @@ begin
     DISP3 : hex7seg port map (hex => dig3, display => display3);
 
     db_tempo <= dig3 & dig2 & dig1 & dig0;
+	 db_latch_a   <= latch_a;
+	 db_latch_b   <= latch_b;
 
 end architecture;
