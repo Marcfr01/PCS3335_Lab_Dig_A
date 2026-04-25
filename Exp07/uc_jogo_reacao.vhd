@@ -91,12 +91,12 @@ begin
                       PREPARA      when (estado_atual = PREPARA      and resposta      = '0') else
 
                       PERDEU       when (estado_atual = FALSO_ALARME and resposta      = '1') else
-                      PREPARA2     when (estado_atual = FALSO_ALARME and passou2s      = '0') else
-                      FALSO_ALARME when (estado_atual = FALSO_ALARME and resposta      = '0') else
+                      PREPARA2     when (estado_atual = FALSO_ALARME and passou2s      = '1' and resposta 		= '0') else
+                      FALSO_ALARME when (estado_atual = FALSO_ALARME and passou2s 		= '0' and resposta      = '0') else
 							 
-					  ERROR        when (estado_atual = PREPARA2     and resposta      = '1') else
-                      ESTIMULA     when (estado_atual = PREPARA2     and passou_metade = '1' and resposta   = '0') else
-                      PREPARA2     when (estado_atual = PREPARA2     and resposta      = '0') else 
+							 ERROR        when (estado_atual = PREPARA2     and resposta      = '1') else
+                      ESTIMULA     when (estado_atual = PREPARA2     and passou_rand   = '1' and resposta      = '0') else
+                      PREPARA2     when (estado_atual = PREPARA2     and passou_rand   = '0' and resposta      = '0') else 
 
                       MEDE         when  estado_atual = ESTIMULA                              else
 
@@ -127,8 +127,8 @@ begin
     sel_erro     <= '1' when  estado_atual = ERROR                            else '0';
 
     -- Controle do contador de espera (fase PREPARA - A2 e B1)
-    contar_espera <= '1' when  estado_atual = PREPARA      else '0';
-    clr_espera    <= '0' when  estado_atual = PREPARA      else '1';
+    contar_espera <= '1' when  (estado_atual = PREPARA or estado_atual = PREPARA2)     else '0';
+    clr_espera    <= '0' when  (estado_atual = PREPARA or estado_atual = PREPARA2 or estado_atual = FALSO_ALARME)     else '1';
 
     -- Controle do contador de alarme falso (fase FALSO_ALARME - B1)
     contar_falso  <= '1' when  estado_atual = FALSO_ALARME else '0';
@@ -148,7 +148,8 @@ begin
                  "0110" when estado_atual = ESPERA       else  
                  "0111" when estado_atual = ERROR        else  
                  "1000" when estado_atual = FALSO_ALARME else  
-			     "1001" when estado_atual = PERDEU       else
+					  "1001" when estado_atual = PREPARA2 		else
+					  "1010" when estado_atual = PERDEU       else
                  "0000";
 					  
 	 gbr <= "101" when estado_atual  = ERROR                            else 
