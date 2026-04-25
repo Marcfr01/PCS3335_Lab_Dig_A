@@ -8,9 +8,11 @@
 --   TC2 - INICIAL -> PREPARA (jogar=1)
 --   TC3 - PREPARA -> ESTIMULA (passou10=1, resposta=0)
 --   TC4 - PREPARA -> ERROR   (resposta=1 durante espera)
---   TC5 - ESTIMULA -> FIM    (resposta=1 apos estimulo)
+--   TC5 - ESTIMULA -> MEDE -> FIM    (resposta=1 apos estimulo)
 --   TC6 - FIM -> ESPERA      (resposta=1 no estado FIM)
---   TC7 - Contagem longa: contador ultrapassa MODULO (RCO cicla)
+--   TC7: ESTIMULA -> MEDE -> FIM
+--   TC8: ESTIMULA -> MEDE -> FIM
+--   TC9 - Contagem longa: contador ultrapassa MODULO (RCO cicla)
 -- =============================================================
 
 library ieee;
@@ -77,7 +79,7 @@ architecture sim of tb_jogo_reacao is
     -- Controle de simulacao
     signal keep_simulating : std_logic := '1';
 
-    -- Periodo do clock: 1us (1 kHz)
+    -- Periodo do clock: 1ms (1 kHz)
     constant T_CLK  : time := 1 ms;
     -- Atraso apos borda para evitar setup/hold violations
     constant T_HOLD : time := 100 ns;
@@ -170,11 +172,11 @@ begin
 
         -- ======================================================
         -- TC3: PREPARA -> ESTIMULA
-        -- Condicao: entrar em PREPARA e aguardar os 10000 ciclos
-        --           do contador (MODULO=10000) com resposta=0
+        -- Condicao: entrar em PREPARA e aguardar os N_rand ciclos
+        --           do contador com resposta=0
         -- Esperado: estimulo=1, ligado=1, erro=0
         -- ======================================================
-        report "=== TC3: PREPARA -> ESTIMULA (5000 clocks) ===" severity note;
+        report "=== TC3: PREPARA -> ESTIMULA (N_rand clocks) ===" severity note;
 		  
 		  caso <= 3;
 
@@ -200,7 +202,7 @@ begin
         -- ======================================================
         -- TC4: PREPARA -> ERROR
         -- Condicao: entrar em PREPARA e acionar resposta=1
-        --           antes de passou10
+        --           antes de ESTIMULA
         -- Esperado: erro=1, estimulo=0, ligado=0
         -- ======================================================
         report "=== TC4: PREPARA -> ERROR ===" severity note;
@@ -334,11 +336,11 @@ begin
 		  
         -- ======================================================
         -- TC9: Contagem longa - contador ultrapassa MODULO
-        -- Condicao: entrar em PREPARA e aguardar mais de 5000
+        -- Condicao: entrar em PREPARA e aguardar mais N_rand
         --           ciclos; verificar que o RCO cicla e o
         --           circuito avanca para ESTIMULA corretamente.
         --           Em seguida, permanece em ESTIMULA por mais
-        --           de 5000 ciclos para garantir que o contador
+        --           de 5050 ciclos para garantir que o contador
         --           ciclando nao perturba o estado da FSM.
         -- Esperado: estimulo=1 e circuito estavel em ESTIMULA
         -- ======================================================
