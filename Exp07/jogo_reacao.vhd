@@ -21,6 +21,8 @@ entity jogo_reacao is
         pronto       : out std_logic;
         -- debug
         db_estado    : out std_logic_vector(6 downto 0);
+		  db_latcha     : out std_logic_vector(2 downto 0);
+		  db_latchb     : out std_logic_vector(2 downto 0);
         led_rgb   : out std_logic_vector(2 downto 0)
     );
 end entity jogo_reacao;
@@ -39,6 +41,7 @@ architecture estrutural of jogo_reacao is
             tem_falso     : in  std_logic;
             passou_rand   : in  std_logic;
             passou_falso  : in  std_logic;
+				passou2s      : in  std_logic;
             passou_metade : in  std_logic;
             ligado        : out std_logic;
             estimulo      : out std_logic;
@@ -70,12 +73,15 @@ architecture estrutural of jogo_reacao is
             sel_erro      : in  std_logic;
             passou_rand   : out std_logic;
             passou_falso  : out std_logic;
+				passou_2s     : out std_logic;
             passou_metade : out std_logic;
             tem_falso     : out std_logic;
             display0      : out std_logic_vector(6 downto 0);
             display1      : out std_logic_vector(6 downto 0);
             display2      : out std_logic_vector(6 downto 0);
             display3      : out std_logic_vector(6 downto 0);
+				db_latch_a    : out std_logic_vector(2 downto 0);
+				db_latch_b   : out std_logic_vector(2 downto 0);
             db_tempo      : out std_logic_vector(15 downto 0)
         );
     end component;
@@ -105,10 +111,13 @@ architecture estrutural of jogo_reacao is
     signal s_passou_falso  : std_logic;
     signal s_passou_metade : std_logic;
     signal s_tem_falso     : std_logic;
+	 signal passou2s_int    : std_logic;
     -- Saidas de estado UC -> portas externas
     signal s_estimulo      : std_logic;
     signal s_alarme_falso  : std_logic;
 	 signal db_estado3		: std_logic_vector(3 downto 0);
+	 --signal db_latcha       : std_logic_vector(3 downto 0);
+	 --signal db_latchb       : std_logic_vector(3 downto 0);
 
 begin
 
@@ -121,6 +130,7 @@ begin
             tem_falso     => s_tem_falso,
             passou_rand   => s_passou_rand,
             passou_falso  => s_passou_falso,
+				passou2s      => passou2s_int,
             passou_metade => s_passou_metade,
             ligado        => ligado,
             estimulo      => s_estimulo,
@@ -151,12 +161,15 @@ begin
             sel_erro      => s_sel_erro,
             passou_rand   => s_passou_rand,
             passou_falso  => s_passou_falso,
+				passou_2s     => passou2s_int,
             passou_metade => s_passou_metade,
             tem_falso     => s_tem_falso,
             display0      => display0,
             display1      => display1,
             display2      => display2,
             display3      => display3,
+				db_latch_a    => db_latcha,
+				db_latch_b    => db_latchb,
             db_tempo      => open
         );
 
