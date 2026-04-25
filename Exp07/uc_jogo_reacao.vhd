@@ -1,27 +1,3 @@
--------------------------------------------------------------------------------
--- Arquivo   : uc_jogo_reacao.vhd
--- Descricao : Unidade de Controle do Jogo do Tempo de Reacao
---             Extensoes implementadas:
---               A2 - Tempo de espera pseudo-aleatorio via LFSR (1 a 7 segundos)
---               B1 - Alarme falso: se M_rand for impar, acende LED azul antes
---                    do estimulo verdadeiro; botao durante alarme = FALSO_ALARME
---
--- Novos estados:
---   FALSO_ALARME: LED azul aceso; pressionar botao leva a ERROR;
---                 apos M_rand/2 segundos, transiciona para ESTIMULA
---
--- Novos sinais de entrada (vindos do FD):
---   tem_falso     - '1' quando M_rand e impar (ha alarme falso nesta rodada)
---   passou_rand   - '1' quando N_rand segundos se passaram em PREPARA (A2)
---   passou_falso  - '1' quando M_rand segundos se passaram em PREPARA (B1)
---   passou_metade - '1' quando M_rand/2 segundos se passaram em FALSO_ALARME (B1)
---
--- Novos sinais de saida (para FD e top-level):
---   alarme_falso  - '1' durante FALSO_ALARME (LED azul RGB)
---   clr_falso     - clear ativo-alto do contador do FALSO_ALARME
---   contar_falso  - enable do contador do FALSO_ALARME
--------------------------------------------------------------------------------
-
 library ieee;
 use ieee.std_logic_1164.all;
 
