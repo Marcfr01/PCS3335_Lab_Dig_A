@@ -12,12 +12,15 @@ entity uc_jogo_reacao is
 		  errou 			 : in  std_logic; -- aqui usa errou como entrada apenas para testar o funcionamento das musica
 													-- no projeto final errou sera dado pela nao resposta ou resposta errada do jogador
         retry			 : in  std_logic;
+		  fim1          : in  std_logic;
+		  fim2          : in  std_logic;
 		  --resposta      : in  std_logic;
         --passou5s      : in  std_logic;   
         ligado        : out std_logic;
-        perde         : out std_logic;
+        perdeu        : out std_logic;
 		  tocar1        : out std_logic;
 		  tocar2        : out std_logic;
+		  pronto        : out std_logic;
 		  --estimulo      : out std_logic;
         --erro          : out std_logic;
         --pronto        : out std_logic;
@@ -26,14 +29,14 @@ entity uc_jogo_reacao is
         --clr_tempo     : out std_logic;   
         --contar_tempo  : out std_logic;   
         --sel_erro      : out std_logic;   
-		  loss			 : out std_logic;
+		  --loss			 : out std_logic;
         db_estado     : out std_logic_vector(3 downto 0)
     );
 end entity uc_jogo_reacao;
 
 architecture arch of uc_jogo_reacao is
 
-    type estados is (INICIAL, MUSICA1, MUSICA2, JOGA1, JOGA2, PERDEU);  -- falta estado FIM (usar pointers do FD)
+    type estados is (INICIAL, MUSICA1, MUSICA2, JOGA1, JOGA2, FIM, PERDE);  -- falta estado FIM (usar pointers do FD)
     signal estado_atual, proximo_estado : estados;
 	 signal s_botao_next : std_logic := '0';
 begin
@@ -45,11 +48,11 @@ begin
 			end if;
 	 end process;
 	 
-	process(botao_next) -- estabilizacao do botao
+	 process(botao_next) -- estabilizacao do botao
 		begin
 			if rising_edge(botao_next) then s_botao_next <= '1';
 			end if;
-	end process;
+		end process;
 
     proximo_estado <= INICIAL  when (estado_atual = INICIAL and jogar     = '0') else
 							 MUSICA1  when (estado_atual = INICIAL and jogar     = '1') else
@@ -59,22 +62,27 @@ begin
 							 JOGA2    when (estado_atual = MUSICA2 and botao_sel = '1') else
 							 MUSICA2  when (estado_atual = MUSICA2 and botao_sel = '0' and s_botao_next = '0') else
 							 MUSICA1  when (estado_atual = MUSICA2 and botao_sel = '0' and s_botao_next = '1') else
-							 JOGA1    when (estado_atual = JOGA1   and errou    = '0') else
-							 PERDEU   when (estado_atual = JOGA1   and errou    = '1') else
-							 JOGA2    when (estado_atual = JOGA2   and errou    = '0') else
-							 PERDEU   when (estado_atual = JOGA2   and errou    = '1') else
-							 PERDEU   when (estado_atual = PERDEU  and retry     = '0') else
-							 MUSICA1  when (estado_atual = PERDEU  and retry     = '1') else
+							 JOGA1    when (estado_atual = JOGA1   and errou    = '0'  and fim1 = '0') else
+							 FIM      when (estado_atual = JOGA1   and errou    = '0'  and fim1 = '1') else
+							 PERDE   when (estado_atual = JOGA1   and errou    = '1') else
+							 JOGA2    when (estado_atual = JOGA2   and errou    = '0'  and fim2 = '0') else
+						    FIM      when (estado_atual = JOGA2   and errou    = '0'  and fim2 = '1') else
+							 PERDE   when (estado_atual = JOGA2   and errou    = '1') else
+							 FIM      when (estado_atual = FIM     and retry    = '0') else
+							 MUSICA1  when (estado_atual = FIM     and retry    = '1') else
+							 PERDE   when (estado_atual = PERDE  and retry     = '0') else
+							 MUSICA1  when (estado_atual = PERDE  and retry     = '1') else
                       estado_atual;
 
 
     ligado   <= '0' when (estado_atual = INICIAL) else '1';
-    loss     <= '1' when (estado_atual = PERDEU)  else '0';
+    perdeu   <= '1' when (estado_atual = PERDE)  else '0';
 	 tocar1   <= '1' when (estado_atual = JOGA1)   else '0';
 	 tocar2   <= '1' when (estado_atual = JOGA2)   else '0';
+	 pronto   <= '1' when (estado_atual = FIM) 	  else '0';
+    
 	 
     --estimulo <= '1' when (estado_atual = ESTIMULA or estado_atual = MEDE) else '0';
-    --pronto   <= '1' when (estado_atual = FIM or estado_atual = ESPERA) else '0';
     --sel_erro <= '1' when  estado_atual = ERROR   else '0';
 
     --contar_espera <= '1' when  estado_atual = PREPARA  else '0';
@@ -89,7 +97,8 @@ begin
                  "0011" when estado_atual = MUSICA2  else
                  "0100" when estado_atual = JOGA1    else
                  "0101" when estado_atual = JOGA2    else
-                 "0110" when estado_atual = PERDEU   else
+                 "0110" when estado_atual = FIM      else
+					  "0111" when estado_atual = PERDE   else
                  "0000";
 
 end architecture;
