@@ -15,7 +15,7 @@ entity uc_jogo_reacao is
 		  --resposta      : in  std_logic;
         --passou5s      : in  std_logic;   
         ligado        : out std_logic;
-        perdeu        : out std_logic;
+        perde         : out std_logic;
 		  tocar1        : out std_logic;
 		  tocar2        : out std_logic;
 		  --estimulo      : out std_logic;
@@ -45,11 +45,11 @@ begin
 			end if;
 	 end process;
 	 
-	 process(botao_next) -- estabilizacao do botao
+	process(botao_next) -- estabilizacao do botao
 		begin
 			if rising_edge(botao_next) then s_botao_next <= '1';
 			end if;
-		end process;
+	end process;
 
     proximo_estado <= INICIAL  when (estado_atual = INICIAL and jogar     = '0') else
 							 MUSICA1  when (estado_atual = INICIAL and jogar     = '1') else
