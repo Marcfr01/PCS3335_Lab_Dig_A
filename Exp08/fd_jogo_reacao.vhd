@@ -14,25 +14,20 @@ entity fd_jogo_reacao is
 		  
         -- Controle da musica 1
 		  tocar1        : in  std_logic;
-        --clr_espera1   : in  std_logic;
-        --contar_espera1: in  std_logic;
-		  
+		  incr1         : in  std_logic;
+		  resetP1       : in  std_logic;
+    
         -- Controle da musica 2
         tocar2        : in  std_logic;
-		  --clr_espera2   : in  std_logic;
-        --contar_espera2: in  std_logic;
+		  incr2         : in  std_logic;
+		  resetP2       : in  std_logic;
+
+		  --Controle de tempo
+		  enableCont    : in  std_logic;
+		  resetCont     : in  std_logic;
 		  
-        -- Controle da medicao de tempo de reacao
-        --clr_tempo     : in  std_logic;
-        --contar_tempo  : in  std_logic;
-        --sel_erro      : in  std_logic;
-		  
-        -- Condicoes de tempo para a UC
-        --passou_rand   : out std_logic;   -- A2: N_rand s em PREPARA (sem alarme)
-        --passou_falso  : out std_logic;   -- B1: M_rand s em PREPARA (com alarme)
-        --passou_2s     : out std_logic;   -- B1: 2 s fixos em FALSO_ALARME
-        --passou_metade : out std_logic;   -- B1: M_rand/2 s em PREPARA2
-        --tem_falso     : out std_logic;   -- B1: '1' se M_rand e impar
+		  -- sinal de indicacao de fim da nota
+		  notou         : out std_logic;
 		  
 		  -- sinais de indicacao de fim da musica
 		  fim1          : out std_logic;
@@ -44,11 +39,10 @@ entity fd_jogo_reacao is
         display2      : out std_logic_vector(6 downto 0);
         display3      : out std_logic_vector(6 downto 0);
 		  
-		  --led rgb
+		  -- led rgb
 		  rgb           : out std_logic_vector(2 downto 0);
-		  --db_latch_a    : out std_logic_vector(2 downto 0);
-		  --db_latch_b   : out std_logic_vector(2 downto 0);
 		  
+		  -- sinal de depuracao
         db_tempo      : out std_logic_vector(15 downto 0)
     );
 end entity fd_jogo_reacao;
@@ -108,15 +102,15 @@ architecture arch of fd_jogo_reacao is
     -- =========================================================================
     -- Sinais internos: Controle do contador auxiliar
     -- =========================================================================
-    signal enableCont    : std_logic;
-	 signal resetCont     : std_logic;
+    --signal enableCont    : std_logic;
+	 --signal resetCont     : std_logic;
 	 signal tempoCont     : std_logic_vector(14 downto 0);
 	 
 	 -- =========================================================================
     -- Sinais internos: Endereco e conteudo da ROM
     -- =========================================================================
 	 constant tamanho          : natural := 3; -- tamanho generico dos endereços da ROM das músicas
-	 signal pointer1, pointer2 : std_logic_vector(tamanho - 1 downto 0);
+	 signal pointer1, pointer2 : std_logic_vector(14 downto 0);
 	 signal data1, data2       : std_logic_vector(16 downto 0);
 	 signal tempo              : std_logic_vector(9 downto 0);
 	 
@@ -144,8 +138,34 @@ begin
 				RCO    =>  open
         );
 		  
-	resetCont  <= '0' when ((tocar1 = '1' or tocar2 = '1') and unsigned(tempoCont) < unsigned(tempo)) else '1';
-	enableCont <= '1' when (tocar1 = '1' or tocar2 = '1') else '0';
+	notou <= '1' when (unsigned(tempoCont) >= unsigned(tempo)) else '0';
+	--resetCont  <= '0' when ((tocar1 = '1' or tocar2 = '1') and unsigned(tempoCont) < unsigned(tempo)) else '1';
+	--enableCont <= '1' when (tocar1 = '1' or tocar2 = '1') else '0';
+	 
+	 -- =========================================================================
+    -- Cont : Pointers 1 e 2
+    --   Modulo 5000 (5s em 1kHz)
+    -- =========================================================================
+	 P1 : contador
+        generic map (MODULO => 2**tamanho)
+        port map (
+            clock  => clock,
+            clear  => resetP1,
+            enable => incr1,
+				Q      =>  pointer1,
+				RCO    =>  fim1
+        );
+		  
+	 P2 : contador
+        generic map (MODULO => 2**tamanho)
+        port map (
+            clock  => clock,
+            clear  => resetP2,
+            enable => incr2,
+				Q      =>  pointer2,
+				RCO    =>  fim2
+        );
+	 
 	 
 	 -- =========================================================================
     -- Memoria ROM para musicas 1 e 2
@@ -159,7 +179,7 @@ begin
 			  datFileName => "musica1.dat"
 		  )
         port map (
-            addr => pointer1,
+            addr => pointer1(tamanho - 1 downto 0),
 				data => data1
         );
 
@@ -170,7 +190,7 @@ begin
 			  datFileName => "musica2.dat"
 		  )
         port map (
-            addr => pointer2,
+            addr => pointer2(tamanho - 1 downto 0),
 				data => data2
         );
 	
@@ -182,34 +202,34 @@ begin
 				data2(9 downto 0) when tocar2 = '1' else
 				(others => '0');
 	
-	process(clock, reset)
-		begin
-			 if reset = '1' then
-				  pointer1 <= (others => '0');
-			 elsif rising_edge(clock) then
-				  if (tocar1 = '1' and unsigned(tempoCont) < unsigned(tempo)) then 
-						pointer1 <= std_logic_vector(unsigned(pointer1) + 1);
-				  elsif (tocar1 = '0') then
-						pointer1 <= (others => '0'); -- zera se não estiver tocando
-				  end if;
-			 end if;
-	end process;
+	--process(clock, reset)
+	--	begin
+	--		 if reset = '1' then
+	--			  pointer1 <= (others => '0');
+	--		 elsif rising_edge(clock) then
+	--			  if (tocar1 = '1' and unsigned(tempoCont) >= unsigned(tempo)) then 
+	--					pointer1 <= std_logic_vector(unsigned(pointer1) + 1);
+	--			  elsif (tocar1 = '0') then
+	--					pointer1 <= (others => '0'); -- zera se não estiver tocando
+	--			  end if;
+	--		 end if;
+	--end process;
 	
-	process(clock, reset)
-		begin
-			 if reset = '1' then
-				  pointer2 <= (others => '0');
-			 elsif rising_edge(clock) then
-				  if (tocar2 = '1' and unsigned(tempoCont) < unsigned(tempo)) then 
-						pointer2 <= std_logic_vector(unsigned(pointer2) + 1);
-				  elsif (tocar2 = '0') then
-						pointer2 <= (others => '0'); -- zera se não estiver tocando
-				  end if;
-			 end if;
-	end process;
+	--process(clock, reset)
+	--	begin
+	--		 if reset = '1' then
+	--			  pointer2 <= (others => '0');
+	--		 elsif rising_edge(clock) then
+	--			  if (tocar2 = '1' and unsigned(tempoCont) >= unsigned(tempo)) then 
+	--					pointer2 <= std_logic_vector(unsigned(pointer2) + 1);
+	--			  elsif (tocar2 = '0') then
+	--					pointer2 <= (others => '0'); -- zera se não estiver tocando
+	--			  end if;
+	--		 end if;
+	--end process;
 	
-	fim1 <= '1' when unsigned(pointer1) = (tamanho) else '0';
-	fim2 <= '1' when unsigned(pointer2) = (tamanho) else '0';
+	--fim1 <= '1' when unsigned(pointer1) = (tamanho) else '0';
+	--fim2 <= '1' when unsigned(pointer2) = (tamanho) else '0';
 	
 	--pointer1 <= pointer1 									when (tocar1 = '1' and unsigned(tempoCont) < unsigned(tempo)) else
 	--				std_logic_vector(unsigned(pointer1) + 1)  when (tocar1 = '1' and unsigned(tempoCont) = unsigned(tempo)) else
