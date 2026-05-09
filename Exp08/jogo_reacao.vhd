@@ -35,12 +35,19 @@ architecture estrutural of jogo_reacao is
 			  errou			 : in  std_logic;
 			  retry         : in  std_logic;
 			  fim1          : in  std_logic;
-			  fim2          : in  std_logic;   
+			  fim2          : in  std_logic;
+			  notou         : in  std_logic;
+			  incr1         : out std_logic;   
+			  incr2         : out std_logic;
+			  resetP1       : out std_logic;
+			  resetP2       : out std_logic;	  
 			  ligado        : out std_logic;
 			  perdeu        : out std_logic;
 			  tocar1        : out std_logic;
 			  tocar2        : out std_logic;
 			  pronto        : out std_logic;
+			  enableCont    : out std_logic;
+			  resetCont     : out std_logic;
 			  db_estado     : out std_logic_vector(3 downto 0)
         );
     end component;
@@ -50,9 +57,16 @@ architecture estrutural of jogo_reacao is
 			  clock         : in  std_logic;
 			  reset         : in  std_logic;
 			  tocar1        : in  std_logic;
+			  incr1         : in  std_logic;
+			  resetP1       : in  std_logic;
 			  tocar2        : in  std_logic;
+			  incr2         : in  std_logic;
+			  resetP2       : in  std_logic;
+			  enableCont    : in  std_logic;
+			  resetCont     : in  std_logic;
+			  notou         : out std_logic;
 			  fim1          : out std_logic;
-			  fim2          : out std_logic; 
+			  fim2          : out std_logic;
 			  display0      : out std_logic_vector(6 downto 0);
 			  display1      : out std_logic_vector(6 downto 0);
 			  display2      : out std_logic_vector(6 downto 0);
@@ -73,6 +87,8 @@ architecture estrutural of jogo_reacao is
 	 signal s_tocar1, s_tocar2  : std_logic;
 	 signal s_fim1, s_fim2  : std_logic;
 	 signal db_estado3      : std_logic_vector(3 downto 0);
+	 
+	 signal s_notou, s_incr1, s_incr2, s_resetP1, s_resetP2, s_enableCont, s_resetCont : std_logic;
 
 begin
 
@@ -87,11 +103,18 @@ begin
 				retry         => retry,
 				fim1          => s_fim1,
 				fim2          => s_fim2,
+				notou         => s_notou,
+			   incr1         => s_incr1,   
+			   incr2         => s_incr2,
+			   resetP1       => s_resetP1,
+			   resetP2       => s_resetP2,
             ligado        => ligado,
 				perdeu 		  => s_perdeu,
 				tocar1        => s_tocar1,
 				tocar2        => s_tocar2,
 				pronto        => pronto,
+				enableCont    => s_enableCont,
+				resetCont     => s_resetCont,
             db_estado     => db_estado3
         );
 
@@ -100,7 +123,14 @@ begin
             clock         => clock,
             reset         => reset,
 				tocar1  		  => s_tocar1,
+				incr1         => s_incr1,
+				resetP1       => s_resetP1,
 				tocar2 		  => s_tocar2,
+				incr2         => s_incr2,
+				resetP2       => s_resetP2,
+				enableCont    => s_enableCont,
+				resetCont     => s_resetCont,
+				notou         => s_notou,
 				fim1          => s_fim1,
 				fim2          => s_fim2,
             display0      => display0,
