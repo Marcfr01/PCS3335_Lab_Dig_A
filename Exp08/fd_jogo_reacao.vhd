@@ -83,6 +83,21 @@ architecture arch of fd_jogo_reacao is
             display : out std_logic_vector(6 downto 0)
         );
     end component;
+	 
+	 function conversao_rgb(cor : std_logic_vector(6 downto 0))
+        return std_logic_vector is
+    begin
+        case cor is
+            when "1000000" => return "100"; -- Vermelho
+            when "0100000" => return "010"; -- Verde
+            when "0010000" => return "001"; -- Azul
+            when "0001000" => return "110"; -- Amarelo
+            when "0000100" => return "101"; -- Roxo
+            when "0000010" => return "011"; -- Ciano
+            when "0000001" => return "111"; -- Branco
+            when others    => return "000"; -- Apagado / invalido
+        end case;
+    end function;
 
     -- =========================================================================
     -- Sinais internos: Controle do contador auxiliar
@@ -94,7 +109,8 @@ architecture arch of fd_jogo_reacao is
 	 -- =========================================================================
     -- Sinais internos: Endereco e conteudo da ROM
     -- =========================================================================
-	 signal pointer1, pointer2 : std_logic_vector( downto 0);
+	 constant tamanho          : natural := 6; -- tamanho generico dos endereços da ROM das músicas
+	 signal pointer1, pointer2 : std_logic_vector(tamanho - 1 downto 0);
 	 signal data1, data2       : std_logic_vector(16 downto 0);
 	 signal tempo              : std_logic_vector(9 downto 0);
 	 
@@ -132,7 +148,7 @@ begin
     -- =========================================================================
     M1 : memoriaMusicas
         generic map (
-			  addressSize =>  ,
+			  addressSize =>  tamanho,
 			  dataSize    =>  17,  
 			  datFileName =>  "musica1.dat"
 		  )
@@ -143,7 +159,7 @@ begin
 
     M2 : memoriaMusicas
         generic map (
-			  addressSize =>  ,
+			  addressSize =>  tamanho,
 			  dataSize    =>  17,  
 			  datFileName =>  "musica2.dat"
 		  )
