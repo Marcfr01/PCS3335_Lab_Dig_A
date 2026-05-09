@@ -37,6 +37,7 @@ entity uc_jogo_reacao is
         --contar_tempo  : out std_logic;   
         --sel_erro      : out std_logic;   
 		  --loss			 : out std_logic;
+		  num_musica    : out std_logic_vector(3 downto 0);
         db_estado     : out std_logic_vector(3 downto 0)
     );
 end entity uc_jogo_reacao;
@@ -130,6 +131,10 @@ architecture arch of uc_jogo_reacao is
     --contar_tempo  <= '1' when  estado_atual = MEDE     else '0';
     --clr_tempo     <= '0' when (estado_atual = MEDE or estado_atual = FIM
     --                           or estado_atual = ESPERA or estado_atual = ESTIMULA) else '1';
+	 
+	 num_musica <= "0001" when estado_atual = MUSICA1 else
+					   "0010" when estado_atual = MUSICA2 else 
+						"0000";
 
     db_estado <= "0001" when estado_atual = INICIAL  else
                  "0010" when estado_atual = MUSICA1  else
