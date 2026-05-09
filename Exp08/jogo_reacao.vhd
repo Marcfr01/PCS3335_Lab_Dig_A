@@ -18,7 +18,7 @@ entity jogo_reacao is
         perdeu   		: out std_logic;
         pronto   		: out std_logic;
 		  gbr          : out std_logic_vector(2 downto 0);
-        db_estado 	: out std_logic_vector(3 downto 0)
+        db_estado 	: out std_logic_vector(6 downto 0)
         --db_tempo  	: out std_logic_vector(15 downto 0)
     );
 end entity jogo_reacao;
@@ -62,9 +62,17 @@ architecture estrutural of jogo_reacao is
         );
     end component;
 	 
+	 component hex7seg is
+        port (
+            hex     : in  std_logic_vector(3 downto 0);
+            display : out std_logic_vector(6 downto 0)
+        );
+    end component;
+	 
 	 signal s_perdeu        : std_logic;
 	 signal s_tocar1, s_tocar2  : std_logic;
 	 signal s_fim1, s_fim2  : std_logic;
+	 signal db_estado3      : std_logic_vector(3 downto 0);
 
 begin
 
@@ -84,7 +92,7 @@ begin
 				tocar1        => s_tocar1,
 				tocar2        => s_tocar2,
 				pronto        => pronto,
-            db_estado     => db_estado
+            db_estado     => db_estado3
         );
 
     FD : fd_jogo_reacao
@@ -102,6 +110,9 @@ begin
 				rgb 			  => gbr,
             db_tempo      => open --db_tempo
         );
+		  
+		   hx : hex7seg
+		port map(db_estado3, db_estado);
 
 
 end architecture;
