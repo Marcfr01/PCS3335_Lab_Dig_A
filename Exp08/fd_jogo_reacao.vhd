@@ -34,6 +34,10 @@ entity fd_jogo_reacao is
         --passou_metade : out std_logic;   -- B1: M_rand/2 s em PREPARA2
         --tem_falso     : out std_logic;   -- B1: '1' se M_rand e impar
 		  
+		  -- sinais de indicacao de fim da musica
+		  fim1          : out std_logic;
+		  fim2          : out std_logic;
+		  
         -- Displays de 7 segmentos
         display0      : out std_logic_vector(6 downto 0);
         display1      : out std_logic_vector(6 downto 0);
@@ -61,7 +65,7 @@ architecture arch of fd_jogo_reacao is
 			datFileName : string := "memInstr_conteudo.dat"
 		);
 		port (
-			addr : in std_logic_vector (addressSize - 1 downto 0);
+			addr : in  std_logic_vector (addressSize - 1 downto 0);
 			data : out std_logic_vector (dataSize - 1 downto 0)
 		);
 	end component;
@@ -84,6 +88,7 @@ architecture arch of fd_jogo_reacao is
         );
     end component;
 	 
+	 
 	 function conversao_rgb(cor : std_logic_vector(6 downto 0))
         return std_logic_vector is
     begin
@@ -99,6 +104,7 @@ architecture arch of fd_jogo_reacao is
         end case;
     end function;
 
+	 
     -- =========================================================================
     -- Sinais internos: Controle do contador auxiliar
     -- =========================================================================
@@ -148,9 +154,9 @@ begin
     -- =========================================================================
     M1 : memoriaMusicas
         generic map (
-			  addressSize =>  tamanho,
-			  dataSize    =>  17,  
-			  datFileName =>  "musica1.dat"
+			  addressSize => tamanho,
+			  dataSize    => 17,  
+			  datFileName => "musica1.dat"
 		  )
         port map (
             addr => pointer1,
@@ -159,9 +165,9 @@ begin
 
     M2 : memoriaMusicas
         generic map (
-			  addressSize =>  tamanho,
-			  dataSize    =>  17,  
-			  datFileName =>  "musica2.dat"
+			  addressSize => tamanho,
+			  dataSize    => 17,  
+			  datFileName => "musica2.dat"
 		  )
         port map (
             addr => pointer2,
@@ -201,6 +207,9 @@ begin
 				  end if;
 			 end if;
 	end process;
+	
+	fim1 <= '1' when unsigned(pointer1) = (tamanho) else '0';
+	fim2 <= '1' when unsigned(pointer2) = (tamanho) else '0';
 	
 	--pointer1 <= pointer1 									when (tocar1 = '1' and unsigned(tempoCont) < unsigned(tempo)) else
 	--				std_logic_vector(unsigned(pointer1) + 1)  when (tocar1 = '1' and unsigned(tempoCont) = unsigned(tempo)) else
