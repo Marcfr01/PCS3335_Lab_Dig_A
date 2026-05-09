@@ -35,24 +35,30 @@ architecture arch of uc_jogo_reacao is
 
     type estados is (INICIAL, MUSICA1, MUSICA2, JOGA1, JOGA2, PERDEU);  -- falta estado FIM (usar pointers do FD)
     signal estado_atual, proximo_estado : estados;
-
+	 signal s_botao_next : std_logic := '0';
 begin
 
     process(clock, reset)
-    begin
-        if reset = '1' then estado_atual <= INICIAL;
-        elsif rising_edge(clock) then estado_atual <= proximo_estado;
-        end if;
-    end process;
+		begin
+			if reset = '1' then estado_atual <= INICIAL;
+			elsif rising_edge(clock) then estado_atual <= proximo_estado;
+			end if;
+	 end process;
+	 
+	 process(botao_next) -- estabilizacao do botao
+		begin
+			if rising_edge(botao_next) then s_botao_next <= '1';
+			end if;
+		end process;
 
     proximo_estado <= INICIAL  when (estado_atual = INICIAL and jogar     = '0') else
 							 MUSICA1  when (estado_atual = INICIAL and jogar     = '1') else
 							 JOGA1    when (estado_atual = MUSICA1 and botao_sel = '1') else
-							 MUSICA1  when (estado_atual = MUSICA1 and botao_sel = '0' and botao_next = '0') else
-							 MUSICA2  when (estado_atual = MUSICA1 and botao_sel = '0' and botao_next = '1') else
+							 MUSICA1  when (estado_atual = MUSICA1 and botao_sel = '0' and s_botao_next = '0') else
+							 MUSICA2  when (estado_atual = MUSICA1 and botao_sel = '0' and s_botao_next = '1') else
 							 JOGA2    when (estado_atual = MUSICA2 and botao_sel = '1') else
-							 MUSICA2  when (estado_atual = MUSICA2 and botao_sel = '0' and botao_next = '0') else
-							 MUSICA1  when (estado_atual = MUSICA2 and botao_sel = '0' and botao_next = '1') else
+							 MUSICA2  when (estado_atual = MUSICA2 and botao_sel = '0' and s_botao_next = '0') else
+							 MUSICA1  when (estado_atual = MUSICA2 and botao_sel = '0' and s_botao_next = '1') else
 							 JOGA1    when (estado_atual = JOGA1   and errou    = '0') else
 							 PERDEU   when (estado_atual = JOGA1   and errou    = '1') else
 							 JOGA2    when (estado_atual = JOGA2   and errou    = '0') else
