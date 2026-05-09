@@ -18,6 +18,7 @@ entity jogo_reacao is
         perdeu   		: out std_logic;
         pronto   		: out std_logic;
 		  gbr          : out std_logic_vector(2 downto 0);
+		  num_musica   : out std_logic_vector(6 downto 0);
         db_estado 	: out std_logic_vector(6 downto 0)
         --db_tempo  	: out std_logic_vector(15 downto 0)
     );
@@ -48,6 +49,7 @@ architecture estrutural of jogo_reacao is
 			  pronto        : out std_logic;
 			  enableCont    : out std_logic;
 			  resetCont     : out std_logic;
+			  num_musica    : out std_logic_vector(3 downto 0);
 			  db_estado     : out std_logic_vector(3 downto 0)
         );
     end component;
@@ -86,7 +88,7 @@ architecture estrutural of jogo_reacao is
 	 signal s_perdeu        : std_logic;
 	 signal s_tocar1, s_tocar2  : std_logic;
 	 signal s_fim1, s_fim2  : std_logic;
-	 signal db_estado3      : std_logic_vector(3 downto 0);
+	 signal db_estado3, num_musica3      : std_logic_vector(3 downto 0);
 	 
 	 signal s_notou, s_incr1, s_incr2, s_resetP1, s_resetP2, s_enableCont, s_resetCont : std_logic;
 
@@ -115,6 +117,7 @@ begin
 				pronto        => pronto,
 				enableCont    => s_enableCont,
 				resetCont     => s_resetCont,
+				num_musica    => num_musica3,
             db_estado     => db_estado3
         );
 
@@ -144,5 +147,7 @@ begin
 		   hx : hex7seg
 		port map(db_estado3, db_estado);
 
+			hx1 : hex7seg
+		port map(num_musica3, num_musica);
 
 end architecture;
