@@ -20,9 +20,8 @@ entity jogo_reacao is
         erro          : out std_logic;
         pronto        : out std_logic;
         gbr           : out std_logic_vector(2 downto 0);
-        db_estado     : out std_logic_vector(3 downto 0)
-        -- FIX 1: db_tempo removido da entity (estava comentado mas sem virgula
-        --        na linha anterior, causando erro de sintaxe na linha 25)
+        db_estado     : out std_logic_vector(3 downto 0);
+        --db_tempo      : out std_logic_vector(15 downto 0)
     );
 end entity jogo_reacao;
 
