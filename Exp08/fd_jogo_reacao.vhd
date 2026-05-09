@@ -115,7 +115,7 @@ architecture arch of fd_jogo_reacao is
 	 -- =========================================================================
     -- Sinais internos: Endereco e conteudo da ROM
     -- =========================================================================
-	 constant tamanho          : natural := 6; -- tamanho generico dos endereços da ROM das músicas
+	 constant tamanho          : natural := 3; -- tamanho generico dos endereços da ROM das músicas
 	 signal pointer1, pointer2 : std_logic_vector(tamanho - 1 downto 0);
 	 signal data1, data2       : std_logic_vector(16 downto 0);
 	 signal tempo              : std_logic_vector(9 downto 0);
