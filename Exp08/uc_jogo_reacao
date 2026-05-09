@@ -9,8 +9,10 @@ entity uc_jogo_reacao is
 		  
 		  botao_next    : in  std_logic;
 		  botao_sel     : in  std_logic;
-		  
-        resposta      : in  std_logic;
+		  errou 			 : in  std_logic; -- aqui usa errou como entrada apenas para testar o funcionamento das musica
+													-- no projeto final errou sera dado pela nao resposta ou resposta errada do jogador
+        retry			 : in  std_logic;
+		  --resposta      : in  std_logic;
         --passou5s      : in  std_logic;   
         ligado        : out std_logic;
         perdeu        : out std_logic;
@@ -24,13 +26,14 @@ entity uc_jogo_reacao is
         --clr_tempo     : out std_logic;   
         --contar_tempo  : out std_logic;   
         --sel_erro      : out std_logic;   
+		  loss			 : out std_logic;
         db_estado     : out std_logic_vector(3 downto 0)
     );
 end entity uc_jogo_reacao;
 
 architecture arch of uc_jogo_reacao is
 
-    type estados is (INICIAL, MUSICA1, MUSICA2, JOGA1, JOGA2, PERDEU);
+    type estados is (INICIAL, MUSICA1, MUSICA2, JOGA1, JOGA2, PERDEU);  -- falta estado FIM (usar pointers do FD)
     signal estado_atual, proximo_estado : estados;
 
 begin
@@ -50,17 +53,17 @@ begin
 							 JOGA2    when (estado_atual = MUSICA2 and botao_sel = '1') else
 							 MUSICA2  when (estado_atual = MUSICA2 and botao_sel = '0' and botao_next = '0') else
 							 MUSICA1  when (estado_atual = MUSICA2 and botao_sel = '0' and botao_next = '1') else
-							 JOGA1    when (estado_atual = JOGA1   and perdeu    = '0') else
-							 PERDEU   when (estado_atual = JOGA1   and perdeu    = '1') else
-							 JOGA2    when (estado_atual = JOGA2   and perdeu    = '0') else
-							 PERDEU   when (estado_atual = JOGA2   and perdeu    = '1') else
+							 JOGA1    when (estado_atual = JOGA1   and errou    = '0') else
+							 PERDEU   when (estado_atual = JOGA1   and errou    = '1') else
+							 JOGA2    when (estado_atual = JOGA2   and errou    = '0') else
+							 PERDEU   when (estado_atual = JOGA2   and errou    = '1') else
 							 PERDEU   when (estado_atual = PERDEU  and retry     = '0') else
 							 MUSICA1  when (estado_atual = PERDEU  and retry     = '1') else
                       estado_atual;
 
 
     ligado   <= '0' when (estado_atual = INICIAL) else '1';
-    perdeu   <= '1' when (estado_atual = PERDEU)  else '0';
+    loss     <= '1' when (estado_atual = PERDEU)  else '0';
 	 tocar1   <= '1' when (estado_atual = JOGA1)   else '0';
 	 tocar2   <= '1' when (estado_atual = JOGA2)   else '0';
 	 
