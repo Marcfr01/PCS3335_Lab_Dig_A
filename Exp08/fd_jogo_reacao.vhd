@@ -61,8 +61,8 @@ architecture arch of fd_jogo_reacao is
 			datFileName : string := "memInstr_conteudo.dat"
 		);
 		port (
-			addr : in bit_vector (addressSize - 1 downto 0);
-			data : out bit_vector (dataSize - 1 downto 0)
+			addr : in std_logic_vector (addressSize - 1 downto 0);
+			data : out std_logic_vector (dataSize - 1 downto 0)
 		);
 	end component;
 	 
