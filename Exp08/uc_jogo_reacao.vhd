@@ -14,13 +14,20 @@ entity uc_jogo_reacao is
         retry			 : in  std_logic;
 		  fim1          : in  std_logic;
 		  fim2          : in  std_logic;
+		  notou         : in  std_logic;
 		  --resposta      : in  std_logic;
-        --passou5s      : in  std_logic;   
+        --passou5s      : in  std_logic; 
+		  incr1         : out std_logic;   
+		  incr2         : out std_logic;
+		  resetP1       : out std_logic;
+		  resetP2       : out std_logic;
         ligado        : out std_logic;
         perdeu        : out std_logic;
 		  tocar1        : out std_logic;
 		  tocar2        : out std_logic;
 		  pronto        : out std_logic;
+		  enableCont    : out std_logic;
+		  resetCont     : out std_logic;
 		  --estimulo      : out std_logic;
         --erro          : out std_logic;
         --pronto        : out std_logic;
@@ -36,10 +43,12 @@ end entity uc_jogo_reacao;
 
 architecture arch of uc_jogo_reacao is
 
-    type estados is (INICIAL, MUSICA1, MUSICA2, JOGA1, JOGA2, FIM, PERDE);  -- falta estado FIM (usar pointers do FD)
+    type estados is (INICIAL, MUSICA1, MUSICA2, JOGA1, PROXIMA1, JOGA2, PROXIMA2, FIM, PERDE);  -- falta estado FIM (usar pointers do FD)
     signal estado_atual, proximo_estado : estados;
 	 signal s_botao_next : std_logic := '0';
-begin
+	 signal botao_next_reg : std_logic := '0';
+	 
+	 begin
 
     process(clock, reset)
 		begin
@@ -48,31 +57,49 @@ begin
 			end if;
 	 end process;
 	 
-	 process(botao_next) -- estabilizacao do botao
+	process(clock)
 		begin
-			if rising_edge(botao_next) then s_botao_next <= '1';
-			end if;
-		end process;
+			 if rising_edge(clock) then
+					botao_next_reg <= botao_next;
+			 end if;
+	end process;
+	
+	s_botao_next <= '1' when (botao_next = '1' and botao_next_reg = '0') else '0';
 
     proximo_estado <= INICIAL  when (estado_atual = INICIAL and jogar     = '0') else
 							 MUSICA1  when (estado_atual = INICIAL and jogar     = '1') else
+							 
 							 JOGA1    when (estado_atual = MUSICA1 and botao_sel = '1') else
 							 MUSICA1  when (estado_atual = MUSICA1 and botao_sel = '0' and s_botao_next = '0') else
 							 MUSICA2  when (estado_atual = MUSICA1 and botao_sel = '0' and s_botao_next = '1') else
+							 
 							 JOGA2    when (estado_atual = MUSICA2 and botao_sel = '1') else
 							 MUSICA2  when (estado_atual = MUSICA2 and botao_sel = '0' and s_botao_next = '0') else
 							 MUSICA1  when (estado_atual = MUSICA2 and botao_sel = '0' and s_botao_next = '1') else
-							 JOGA1    when (estado_atual = JOGA1   and errou    = '0'  and fim1 = '0') else
-							 FIM      when (estado_atual = JOGA1   and errou    = '0'  and fim1 = '1') else
+
+							 JOGA1    when (estado_atual = JOGA1   and fim1      = '0'  and notou       = '0' and errou ='0') else
+							 PROXIMA1 when (estado_atual = JOGA1   and fim1      = '0'  and notou       = '1' and errou ='0') else
+							 FIM      when (estado_atual = JOGA1   and fim1      = '1' and errou ='0') else
+							 
+							 JOGA1    when (estado_atual = PROXIMA1) else    
+							 
+							 JOGA2    when (estado_atual = JOGA2   and fim2      = '0'  and notou       = '0' and errou ='0') else
+							 PROXIMA2 when (estado_atual = JOGA2   and fim2      = '0'  and notou       = '1' and errou ='0') else
+							 FIM      when (estado_atual = JOGA2   and fim2      = '1' and errou ='0') else
+							 
+							 JOGA2    when (estado_atual = PROXIMA2) else
+							 
 							 PERDE   when (estado_atual = JOGA1   and errou    = '1') else
-							 JOGA2    when (estado_atual = JOGA2   and errou    = '0'  and fim2 = '0') else
-						    FIM      when (estado_atual = JOGA2   and errou    = '0'  and fim2 = '1') else
+							 
 							 PERDE   when (estado_atual = JOGA2   and errou    = '1') else
+							 
 							 FIM      when (estado_atual = FIM     and retry    = '0') else
 							 MUSICA1  when (estado_atual = FIM     and retry    = '1') else
+							 
 							 PERDE   when (estado_atual = PERDE  and retry     = '0') else
 							 MUSICA1  when (estado_atual = PERDE  and retry     = '1') else
-                      estado_atual;
+                      
+							 estado_atual;
 
 
     ligado   <= '0' when (estado_atual = INICIAL) else '1';
@@ -80,6 +107,18 @@ begin
 	 tocar1   <= '1' when (estado_atual = JOGA1)   else '0';
 	 tocar2   <= '1' when (estado_atual = JOGA2)   else '0';
 	 pronto   <= '1' when (estado_atual = FIM) 	  else '0';
+	 
+	 incr1    <= '1' when (estado_atual = PROXIMA1) else '0';
+	 incr2    <= '1' when (estado_atual = PROXIMA2) else '0';
+	 
+	 resetP1  <= '0' when (estado_atual = JOGA1 or estado_atual = PROXIMA1) else '1';
+	 resetP2  <= '0' when (estado_atual = JOGA2 or estado_atual = PROXIMA2) else '1';
+	 
+	 enableCont <= '1' when (estado_atual = JOGA1 or estado_atual = JOGA2) else '0';
+	 resetCont  <= '0' when (estado_atual = JOGA1 or estado_atual = JOGA2) else '1';
+	 
+	 --resetP1    <= '0' when (estado_atual = JOGA1 or estado_atu
+	 
     
 	 
     --estimulo <= '1' when (estado_atual = ESTIMULA or estado_atual = MEDE) else '0';
