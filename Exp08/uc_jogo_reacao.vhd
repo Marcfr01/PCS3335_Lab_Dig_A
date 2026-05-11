@@ -105,8 +105,8 @@ architecture arch of uc_jogo_reacao is
 
     ligado   <= '0' when (estado_atual = INICIAL) else '1';
     perdeu   <= '1' when (estado_atual = PERDE)  else '0';
-	 tocar1   <= '1' when (estado_atual = JOGA1)   else '0';
-	 tocar2   <= '1' when (estado_atual = JOGA2)   else '0';
+	 tocar1   <= '1' when (estado_atual = JOGA1 or estado_atual = PROXIMA1)   else '0';
+	 tocar2   <= '1' when (estado_atual = JOGA2 or estado_atual = PROXIMA2)   else '0';
 	 pronto   <= '1' when (estado_atual = FIM) 	  else '0';
 	 
 	 incr1    <= '1' when (estado_atual = PROXIMA1) else '0';
@@ -139,8 +139,8 @@ architecture arch of uc_jogo_reacao is
     db_estado <= "0001" when estado_atual = INICIAL  else
                  "0010" when estado_atual = MUSICA1  else
                  "0011" when estado_atual = MUSICA2  else
-                 "0100" when estado_atual = JOGA1    else
-                 "0101" when estado_atual = JOGA2    else
+                 "0100" when (estado_atual = JOGA1 or estado_atual = PROXIMA1)    else
+                 "0101" when (estado_atual = JOGA2 or estado_atual = PROXIMA2)    else
                  "0110" when estado_atual = FIM      else
 					  "0111" when estado_atual = PERDE   else
                  "0000";
