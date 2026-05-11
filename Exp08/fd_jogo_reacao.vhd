@@ -122,6 +122,28 @@ architecture arch of fd_jogo_reacao is
     signal q_ms0, q_ms1, q_ms2, q_ms3 : std_logic_vector(14 downto 0);
     signal dig0, dig1, dig2, dig3    : std_logic_vector(3 downto 0);
 
+	 	 type matrix_8x17 is array (0 to 7) of std_logic_vector(0 to 16);
+	 constant MATRIZ_EXEMPLO1 : matrix_8x17 := (
+    0 => "10000001111111111",
+    1 => "01000001111111111",
+    2 => "00100001111111111",
+    3 => "00010001111111111",
+    4 => "00001001111111111",
+    5 => "00000101111111111",
+    6 => "00000011111111111",
+    7 => (others => '0')
+);
+	constant MATRIZ_EXEMPLO2 : matrix_8x17  := (
+	 0 => "00000111111111111",
+	 1 => "00001010000000000",
+	 2 => "00010010000000000",
+	 3 => "00010000000110000",
+	 4 => "00100001000000000",
+	 5 => "01000000000000001",
+	 6 => "10000000000000100",
+	 7 => "00000000000000000"
+);
+
 begin
 
     -- =========================================================================
@@ -172,27 +194,33 @@ begin
     --   Carregadas por arquivos .dat
 	 --   Conteudo : 7 notas + 10 bits para indicar tempo (intervalo [0; 1023])
     -- =========================================================================
-    M1 : memoriaMusicas
-        generic map (
-			  addressSize => tamanho,
-			  dataSize    => 17,  
-			  datFileName => "musica1.dat"
-		  )
-        port map (
-            addr => pointer1(tamanho - 1 downto 0),
-				data => data1
-        );
-
-    M2 : memoriaMusicas
-        generic map (
-			  addressSize => tamanho,
-			  dataSize    => 17,  
-			  datFileName => "musica2.dat"
-		  )
-        port map (
-            addr => pointer2(tamanho - 1 downto 0),
-				data => data2
-        );
+	 
+	  data1 <= MATRIZ_EXEMPLO1(to_integer(unsigned(pointer1))) when tocar1 = '1' else
+			 (others => '0');
+	  data2 <= MATRIZ_EXEMPLO2(to_integer(unsigned(pointer2))) when tocar2 = '1' else
+			 (others => '0');
+ 
+   --M1 : memoriaMusicas
+   --    generic map (
+	--		  addressSize => tamanho,
+	--		  dataSize    => 17,  
+	--		  datFileName => "musica1.dat"
+	--	  )
+   --    port map (
+   --        addr => pointer1(tamanho - 1 downto 0),
+	--			data => data1
+   --    );
+--
+   --M2 : memoriaMusicas
+   --    generic map (
+	--		  addressSize => tamanho,
+	--		  dataSize    => 17,  
+	--		  datFileName => "musica2.dat"
+	--	  )
+   --    port map (
+   --        addr => pointer2(tamanho - 1 downto 0),
+	--			data => data2
+   --    );
 	
 	rgb <= conversao_rgb(data1(16 downto 10)) when tocar1 = '1' else
 			 conversao_rgb(data2(16 downto 10)) when tocar2 = '1' else
