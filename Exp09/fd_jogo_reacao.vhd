@@ -10,9 +10,12 @@ use ieee.numeric_std.all;
 entity fd_jogo_reacao is
     port (
         clock         : in  std_logic; --NOVOS SINAIS:
-        reset         : in  std_logic; -- ENTRADA: teclado em logic vector
-													-- SAIDA: buzz, resposta, passou05, teclado em binario (acertou ou nao, entrada pra UC)
-        -- Controle da musica 1
+        reset         : in  std_logic; -- ENTRADA: teclado em logic vector, clock50
+													-- SAIDA: buzz, resposta (teclado em binario (acertou ou nao, entrada pra UC)), passou05
+        --clock 50MHz para buzzer
+		  clock50       : in  std_logic;
+		  
+		  -- Controle da musica 1
 		  tocar1        : in  std_logic;
 		  incr1         : in  std_logic;
 		  resetP1       : in  std_logic;
@@ -29,6 +32,9 @@ entity fd_jogo_reacao is
 		  -- sinal de indicacao de fim da nota
 		  notou         : out std_logic;
 		  
+		  -- sinal de indicacao de 500 ms
+		  passou05      : out std_logic;
+		  
 		  -- sinais de indicacao de fim da musica
 		  fim1          : out std_logic;
 		  fim2          : out std_logic;
@@ -44,6 +50,9 @@ entity fd_jogo_reacao is
 		  
 		  -- buzzer
 		  buzz          : out std_logic;
+		  
+		  -- (teclado em binario (acertou ou nao, entrada pra UC)
+		  resposta      : out std_logic;
 		  
 		  -- sinal de depuracao
         db_tempo      : out std_logic_vector(15 downto 0)
@@ -67,25 +76,16 @@ architecture arch of fd_jogo_reacao is
 		);
 	end component;
 	 
-	 component pwm_generator is
-		 port (
-			  clk   : in  std_logic;
-			  reset : in  std_logic;
-			  duty  : in  std_logic_vector (7 downto 0);
-			  pwm   : out std_logic
-		 );
-	end pwm_generator;
 
-	 component contador is
-        generic (MODULO : integer := 1000);
-        port (
-            clock  : in  std_logic;
-            clear  : in  std_logic;
-            enable : in  std_logic;
-            Q      : out std_logic_vector(14 downto 0);
-            RCO    : out std_logic
-        );
-    end component;
+	component ControleBuzzerNotas is
+		 port (
+			  clk       : in  STD_LOGIC;                         
+			  rst       : in  STD_LOGIC;                         
+			  en        : in  STD_LOGIC;                         
+			  nota_in   : in  STD_LOGIC_VECTOR(3 downto 0);      
+			  buzz_out  : out STD_LOGIC                          
+		 );
+	end component;
 
     component hex7seg is
         port (
@@ -110,20 +110,21 @@ architecture arch of fd_jogo_reacao is
         end case;
     end function;
 
-	 function conversao_freq(frequency : std_logic_vector(6 downto 0))
+	 function conversao_nota(data : std_logic_vector(6 downto 0))
         return std_logic_vector is
     begin
-        case cor is
-            when "1000000" => return "100"; -- A
-            when "0100000" => return "010"; -- B
-            when "0010000" => return "001"; -- C
-            when "0001000" => return "110"; -- D
-            when "0000100" => return "101"; -- E
-            when "0000010" => return "011"; -- F
-            when "0000001" => return "111"; -- G
-            when others    => return "000"; -- 0
+        case data is
+            when "1000000" => return "0000"; -- A4
+            when "0100000" => return "0001"; -- B4
+            when "0010000" => return "0010"; -- C4
+            when "0001000" => return "0011"; -- D4
+            when "0000100" => return "0100"; -- E4
+            when "0000010" => return "0101"; -- F4
+            when "0000001" => return "0110"; -- G4
+            when others    => return "1111"; -- 0
         end case;
     end function;
+	 
     -- =========================================================================
     -- Sinais internos: Controle do contador auxiliar
     -- =========================================================================
@@ -148,9 +149,9 @@ architecture arch of fd_jogo_reacao is
     signal dig0, dig1, dig2, dig3    : std_logic_vector(3 downto 0);
 	 
 	 -- =========================================================================
-    -- Sinais internos: controle de frequencia do buzzer
+    -- Sinais internos: controle de nota do buzzer
     -- =========================================================================
-	 signal frequency                 : std_logic_vector(7 downto 0);
+	 signal nota                      : std_logic_vector(3 downto 0);
 	 
 	 	 type matrix_8x17 is array (0 to 7) of std_logic_vector(0 to 16);
 	 constant MATRIZ_EXEMPLO1 : matrix_8x17 := (
@@ -191,9 +192,8 @@ begin
         );
 		  
 	notou <= '1' when (unsigned(tempoCont) >= unsigned(tempo)) else '0';
-	--resetCont  <= '0' when ((tocar1 = '1' or tocar2 = '1') and unsigned(tempoCont) < unsigned(tempo)) else '1';
-	--enableCont <= '1' when (tocar1 = '1' or tocar2 = '1') else '0';
-	 
+	passou05 <= '1' when (unsigned(tempoCont) >= 500) else '0';
+	
 	 -- =========================================================================
     -- Cont : Pointers 1 e 2
     --   Modulo 5000 (5s em 1kHz)
@@ -265,17 +265,18 @@ begin
     --   Ligado quando led estiver ligado
 	 --   Controle de frequencia dado por nota (data1(16 downto 10))
     -- =========================================================================
-	buzzer : pwm_generator
+	buzzer : ControleBuzzerNotas
 	 port map(
-		clock => clock,
-		reset => not(ledar),
-		duty  => frequency,
-		pwm   => buzz
+		clk      => clock50,
+		rst      => reset,
+		en       => ledar,
+		nota_in  => nota,
+		buzz_out => buzz
 	 );
 	
-	frequency <= conversao_freq(data1(16 downto 10)) when tocar1 = '1' else
-					 conversao_freq(data2(16 downto 10)) when tocar2 = '1' else
-					 (others => '0');
+	nota <= conversao_nota(data1(16 downto 10)) when tocar1 = '1' else
+			  conversao_nota(data2(16 downto 10)) when tocar2 = '1' else
+			  (others => '0');
     -- =========================================================================
     -- Medicao de tempo para transicao de nota: cadeia de 4 contadores BCD (0-9)
     --   Resolucao: 1 ms (clock de 1 kHz)
