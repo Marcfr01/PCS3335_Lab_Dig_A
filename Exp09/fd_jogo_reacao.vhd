@@ -115,12 +115,12 @@ architecture arch of fd_jogo_reacao is
     begin
         case data is
             when "1000000" => return "0000"; -- A4
-            when "0100000" => return "0001"; -- B4
-            when "0010000" => return "0010"; -- C4
-            when "0001000" => return "0011"; -- D4
-            when "0000100" => return "0100"; -- E4
-            when "0000010" => return "0101"; -- F4
-            when "0000001" => return "0110"; -- G4
+            when "0100000" => return "0010"; -- B4
+            when "0010000" => return "0011"; -- C5
+            when "0001000" => return "0101"; -- D5
+            when "0000100" => return "0111"; -- E5
+            when "0000010" => return "1000"; -- F5
+            when "0000001" => return "1010"; -- G5
             when others    => return "1111"; -- 0
         end case;
     end function;
