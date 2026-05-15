@@ -38,7 +38,7 @@ entity uc_jogo_reacao is
 end entity uc_jogo_reacao;
 
 architecture arch of uc_jogo_reacao is
-
+-- NOVOS ESTADOS: RESPOSTA1, ACERTOU1, ERROU1, ESPERA1, RESPOSTA2, ACERTOU2, ERROU2, ESPERA2
     type estados is (INICIAL, MUSICA1, MUSICA2, JOGA1, RESPOSTA1, ACERTOU1, ERROU1, ESPERA1, PROXIMA1, JOGA2, RESPOSTA2, ACERTOU2, ERROU2, ESPERA2, PROXIMA2, FIM);  -- falta estado FIM (usar pointers do FD)
     signal estado_atual, proximo_estado : estados;
 	 signal s_botao_next : std_logic := '0';
