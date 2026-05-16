@@ -4,6 +4,7 @@ use ieee.std_logic_1164.all;
 entity jogo_reacao is
     port (
         clock       : in  std_logic;
+		  clock50     : in  std_logic;
         reset       : in  std_logic;
         jogar       : in  std_logic;
         botao_next  : in  std_logic;
@@ -13,6 +14,9 @@ entity jogo_reacao is
         -- Barramento PS/2
         ps2_clk     : in  std_logic;
         ps2_data    : in  std_logic;
+		  
+		  --Saida de pontuacao
+		  pontos      : out std_logic_vector(9 downto 0);
  
         -- Saidas originais
         display0    : out std_logic_vector(6 downto 0);
@@ -68,7 +72,9 @@ architecture estrutural of jogo_reacao is
         port (
             clock         : in  std_logic;
             reset         : in  std_logic;
-            ps2_clk       : in  std_logic;
+				clock50       : in  std_logic;
+				ledar         : in  std_logic;
+				ps2_clk       : in  std_logic;
             ps2_data      : in  std_logic;
             tocar1        : in  std_logic;
             incr1         : in  std_logic;
@@ -81,7 +87,8 @@ architecture estrutural of jogo_reacao is
             somarPts      : in  std_logic;
 				zerarPts      : in  std_logic;
             notou         : out std_logic;
-            fim1          : out std_logic;
+				passou05      : out std_logic;
+				fim1          : out std_logic;
             fim2          : out std_logic;
             resposta      : out std_logic_vector(6 downto 0);
             nota_atual    : out std_logic_vector(6 downto 0);
@@ -91,7 +98,10 @@ architecture estrutural of jogo_reacao is
             display3      : out std_logic_vector(6 downto 0);
             rgb           : out std_logic_vector(2 downto 0);
             buzz          : out std_logic;
-            db_tempo      : out std_logic_vector(15 downto 0)
+				
+				pontos       : out std_logic_vector(9 downto 0);
+            
+				db_tempo      : out std_logic_vector(15 downto 0)
         );
     end component;
  
@@ -111,7 +121,7 @@ architecture estrutural of jogo_reacao is
 	 
 	 signal s_somarPts, s_zerarPts    : std_logic;
     signal s_ledar                   : std_logic;  -- nao exposto externamente
-    signal s_passou05                : std_logic;  -- TODO: ligar a contador de 500ms
+    signal s_passou05                : std_logic := '0';  -- TODO: ligar a contador de 500ms
  
     -- Teclado PS/2
     signal s_resposta   : std_logic_vector(6 downto 0);
@@ -120,7 +130,6 @@ architecture estrutural of jogo_reacao is
     signal s_nota_atual : std_logic_vector(6 downto 0);
 
 begin
-	s_passou05 <= '0';
 
     UC : uc_jogo_reacao
         port map (
@@ -158,6 +167,8 @@ begin
         port map (
             clock         => clock,
             reset         => reset,
+				clock50       => clock50,
+				ledar         => s_ledar,
             ps2_clk       => ps2_clk,
             ps2_data      => ps2_data,
             tocar1        => s_tocar1,
@@ -171,6 +182,7 @@ begin
             somarPts      => s_somarPts,
 				zerarPts      => s_zerarPts,
             notou         => s_notou,
+				passou05      => s_passou05,
             fim1          => s_fim1,
             fim2          => s_fim2,
             resposta      => s_resposta,
@@ -181,6 +193,7 @@ begin
             display3      => display3,
             rgb           => gbr,
             buzz          => buzz,
+				pontos        => pontos,
             db_tempo      => open
         );
 		  
