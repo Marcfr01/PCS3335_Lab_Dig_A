@@ -133,8 +133,8 @@ architecture arch of uc_jogo_reacao is
 	 incr1    <= '1' when (estado_atual = PROXIMA1) else '0';
 	 incr2    <= '1' when (estado_atual = PROXIMA2) else '0';
 	 
-	 resetP1  <= '0' when (estado_atual = JOGA1 or estado_atual = PROXIMA1) else '1';
-	 resetP2  <= '0' when (estado_atual = JOGA2 or estado_atual = PROXIMA2) else '1';
+	 resetP1  <= '0' when (estado_atual = JOGA1 or estado_atual = RESPOSTA1 or estado_atual = ACERTOU1 or estado_atual = ERROU1 or estado_atual = ESPERA1 or estado_atual = PROXIMA1) else '1';
+	 resetP2  <= '0' when (estado_atual = JOGA2 or estado_atual = RESPOSTA2 or estado_atual = ACERTOU2 or estado_atual = ERROU2 or estado_atual = ESPERA2 or estado_atual = PROXIMA2) else '1';
 	 
 	 enableCont <= '1' when (estado_atual = RESPOSTA1 or estado_atual = ACERTOU1 or estado_atual = ERROU1 or estado_atual = ESPERA1) else
 						'1' when (estado_atual = RESPOSTA2 or estado_atual = ACERTOU2 or estado_atual = ERROU2 or estado_atual = ESPERA2) else
@@ -162,12 +162,15 @@ architecture arch of uc_jogo_reacao is
 					   "0010" when estado_atual = MUSICA2 else 
 						"0000";
 
-    db_estado <= "0001" when estado_atual = INICIAL  else
-                 "0010" when estado_atual = MUSICA1  else
-                 "0011" when estado_atual = MUSICA2  else
-                 "0100" when (estado_atual = JOGA1 or estado_atual = PROXIMA1)    else
-                 "0101" when (estado_atual = JOGA2 or estado_atual = PROXIMA2)    else
-                 "0110" when estado_atual = FIM      else
+    db_estado <= "0001" when estado_atual = INICIAL   else
+                 "0010" when estado_atual = MUSICA1   else
+                 "0011" when estado_atual = MUSICA2   else
+                 "0100" when estado_atual = JOGA1     else
+                 "0101" when estado_atual = RESPOSTA1 else
+                 "0110" when estado_atual = ACERTOU1  else
+                 "0111" when estado_atual = ERROU1    else
+                 "1000" when estado_atual = ESPERA1   else
+                 "1001" when estado_atual = PROXIMA1  else
 					  --"0111" when estado_atual = PERDE   else
                  "0000";
 
