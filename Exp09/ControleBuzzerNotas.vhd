@@ -16,21 +16,26 @@ architecture Comportamento of ControleBuzzerNotas is
 
     type tabela_notas is array (0 to 12) of integer;
     
-    -- Referencia Frequencia da notas: https://mixbutton.com/music-tools/frequency-and-pitch/music-note-to-frequency-chart
+    -- Referencia Frequencia da notas: https://iazzetta.eca.usp.br/tutor/acustica/introducao/tabela1.html
     -- Fórmula: 25.000.000 / Frequência_da_Nota
     constant LUT_NOTAS : tabela_notas := (
-        0  => 101239,  -- (B3)  ->  246,94 Hz
-        1  => 270270,  -- (F#2) ->  92,50 Hz	
-        2  => 67529 ,  -- (F#4) ->  369,99 Hz
-        3  => 255102,  -- (G2)  ->  98 Hz          NOTAS SWEDEN
-        4  => 90194 ,  -- (C#4) ->  277,18 Hz
-        5  => 227272,  -- (A2)  ->  110 Hz
-        6  => 75842 ,  -- (E4)  ->  329,63 Hz
-		  7  => 0	  ,  -- Nada
+        0  => 28409,  -- Lá 4  (A4)  ->  880,00 Hz
+        1  => 26815,  -- Lá# 4 (A#4) -> ~932,33 Hz
+        2  => 25310,  -- Si 4  (B4)  -> ~987,77 Hz
+        3  => 23889,  -- Dó 5  (C5)  -> ~1046,50 Hz
+        4  => 22548,  -- Dó# 5 (C#5) -> ~1108,73 Hz
+        5  => 21283,  -- Ré 5  (D5)  -> ~1174,66 Hz
+        6  => 20088,  -- Ré# 5 (D#5) -> ~1244,51 Hz
+        7  => 18961,  -- Mi 5  (E5)  -> ~1318,51 Hz
+        8  => 17897,  -- Fá 5  (F5)  -> ~1396,91 Hz
+        9  => 16892,  -- Fá# 5 (F#5) -> ~1479,98 Hz
+        10 => 15944,  -- Sol 5 (G5)  -> ~1567,98 Hz
+        11 => 15049,  -- Sol# 5(G#5) -> ~1661,22 Hz
+        12 => 14205   -- Lá 5  (A5)  ->  1760,00 Hz
     );
 
     signal counter    : integer range 0 to 30000 := 0;
-    signal max_count  : integer range 0 to 30000 := 246,94; -- Padrão: B3
+    signal max_count  : integer range 0 to 30000 := 247; -- Padrão: B3 tinha q ser 246,97 mas inteiro tem q ser inteiro
     signal toggle_sig : STD_LOGIC := '0';
     
 begin
