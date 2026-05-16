@@ -14,7 +14,16 @@ entity uc_jogo_reacao is
 		  notou         : in  std_logic;
 		  
 		  passou05      : in  std_logic; -- passou 500 ms 
-		  resposta      : in  std_logic; -- resposta ja analisada pelo fd
+		  -- resposta      : in  std_logic; -- resposta ja analisada pelo fd
+		   resposta     : in  std_logic_vector(6 downto 0); -- vetor com as notas tocadas
+			nota_atual   : in  std_logic_vector(6 downto 0);
+		  -- resposta0  : in  std_logic; -- resposta da nota mapeada 0
+		  -- resposta1  : in  std_logic; -- resposta da nota mapeada 1
+		  -- resposta2  : in  std_logic; -- resposta da nota mapeada 2
+		  -- resposta3  : in  std_logic; -- resposta da nota mapeada 3
+		  -- resposta4  : in  std_logic; -- resposta da nota mapeada 4
+		  -- resposta5  : in  std_logic; -- resposta da nota mapeada 5
+		  -- resposta6  : in  std_logic; -- resposta da nota mapeada 6
 		  
 		  incr1         : out std_logic;   
 		  incr2         : out std_logic;
@@ -29,9 +38,10 @@ entity uc_jogo_reacao is
 		  resetCont     : out std_logic;
 		  
 		  somarPts      : out std_logic; -- '1' somente em ACERTOU1 ou ACERTOU2
+		  zerarPts      : out std_logic; -- '1' somente em INICIAL
 		  ledar         : out std_logic; -- acender led, aceso ate a pessoa responder
 													-- da pra usar no controle do buzzer tbm
-
+													
 		  num_musica    : out std_logic_vector(3 downto 0);
         db_estado     : out std_logic_vector(3 downto 0)
     );
@@ -39,10 +49,14 @@ end entity uc_jogo_reacao;
 
 architecture arch of uc_jogo_reacao is
 -- NOVOS ESTADOS: RESPOSTA1, ACERTOU1, ERROU1, ESPERA1, RESPOSTA2, ACERTOU2, ERROU2, ESPERA2
-    type estados is (INICIAL, MUSICA1, MUSICA2, JOGA1, RESPOSTA1, ACERTOU1, ERROU1, ESPERA1, PROXIMA1, JOGA2, RESPOSTA2, ACERTOU2, ERROU2, ESPERA2, PROXIMA2, FIM);  -- falta estado FIM (usar pointers do FD)
+                     ---------- MENU --------- | ------------ JOGO DA MUSICA 1 ----------------------- | ------------ JOGO DA MUSICA 2 -----------------------  
+    type estados is (INICIAL, MUSICA1, MUSICA2,  JOGA1, RESPOSTA1, ACERTOU1, ERROU1, ESPERA1, PROXIMA1, JOGA2, RESPOSTA2, ACERTOU2, ERROU2, ESPERA2, PROXIMA2, FIM);  -- falta estado FIM (usar pointers do FD)
     signal estado_atual, proximo_estado : estados;
 	 signal s_botao_next : std_logic := '0';
 	 signal botao_next_reg : std_logic := '0';
+	 signal acertou : std_logic;
+	 
+	 
 	 
 	 begin
 
@@ -78,9 +92,9 @@ architecture arch of uc_jogo_reacao is
 							 RESPOSTA1 when (estado_atual = JOGA1   and fim1      = '0') else
 							 FIM       when (estado_atual = JOGA1   and fim1      = '1') else
 							 
-							 RESPOSTA1 when (estado_atual = RESPOSTA1 and passou05 = '0' and resposta = '0') else
-							 ERROU1    when (estado_atual = RESPOSTA1 and passou05 = '1' and resposta = '0') else
-							 ACERTOU1  when (estado_atual = RESPOSTA1 and resposta = '1') else
+							 RESPOSTA1 when (estado_atual = RESPOSTA1 and passou05 = '0' and acertou = '0') else
+							 ERROU1    when (estado_atual = RESPOSTA1 and passou05 = '1' and acertou = '0') else
+							 ACERTOU1  when (estado_atual = RESPOSTA1 and acertou = '1') else
 							 
 							 ESPERA1   when (estado_atual = ACERTOU1 or estado_atual = ERROU1) else
 							 
@@ -92,9 +106,9 @@ architecture arch of uc_jogo_reacao is
 							 RESPOSTA2 when (estado_atual = JOGA2   and fim2      = '0') else
 							 FIM       when (estado_atual = JOGA1   and fim2      = '1') else
 							 
-							 RESPOSTA2 when (estado_atual = RESPOSTA2 and passou05 = '0' and resposta = '0') else
-							 ERROU2    when (estado_atual = RESPOSTA2 and passou05 = '1' and resposta = '0') else
-							 ACERTOU2  when (estado_atual = RESPOSTA2 and resposta = '1') else
+							 RESPOSTA2 when (estado_atual = RESPOSTA2 and passou05 = '0' and acertou = '0') else
+							 ERROU2    when (estado_atual = RESPOSTA2 and passou05 = '1' and acertou = '0') else
+							 ACERTOU2  when (estado_atual = RESPOSTA2 and acertou = '1') else
 							 
 							 ESPERA2   when (estado_atual = ACERTOU2 or estado_atual = ERROU2) else
 							 
@@ -136,7 +150,11 @@ architecture arch of uc_jogo_reacao is
 						'1' when (estado_atual = JOGA2 or estado_atual = RESPOSTA2 or estado_atual = ACERTOU2 or estado_atual = ERROU2) else
 						'0';
 						
+	 acertou    <= '1' when ((resposta and nota_atual) /= "0000000") else '0';
+						
 	 somarPts   <= '1' when (estado_atual = ACERTOU1 or estado_atual = ACERTOU2) else '0';
+	 
+	 zerarPts   <= '1' when (estado_atual = INICIAL) else '0';
 	 
 
 	 
