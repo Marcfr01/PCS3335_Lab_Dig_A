@@ -82,7 +82,7 @@ architecture arch of fd_jogo_reacao is
 			  clk       : in  STD_LOGIC;                         
 			  rst       : in  STD_LOGIC;                         
 			  en        : in  STD_LOGIC;                         
-			  nota_in   : in  STD_LOGIC_VECTOR(3 downto 0);      
+			  nota_in   : in  STD_LOGIC_VECTOR(2 downto 0);      
 			  buzz_out  : out STD_LOGIC                          
 		 );
 	end component;
@@ -114,14 +114,14 @@ architecture arch of fd_jogo_reacao is
         return std_logic_vector is
     begin
         case data is
-            when "1000000" => return "0000"; -- A4
-            when "0100000" => return "0010"; -- B4
-            when "0010000" => return "0011"; -- C5
-            when "0001000" => return "0101"; -- D5
-            when "0000100" => return "0111"; -- E5
-            when "0000010" => return "1000"; -- F5
-            when "0000001" => return "1010"; -- G5
-            when others    => return "1111"; -- 0
+            when "1000000" => return "000"; -- A4
+            when "0100000" => return "001"; -- B4
+            when "0010000" => return "010"; -- C5
+            when "0001000" => return "011"; -- D5
+            when "0000100" => return "100"; -- E5
+            when "0000010" => return "101"; -- F5
+            when "0000001" => return "110"; -- G5
+            when others    => return "111"; -- 0
         end case;
     end function;
 	 
@@ -151,27 +151,27 @@ architecture arch of fd_jogo_reacao is
 	 -- =========================================================================
     -- Sinais internos: controle de nota do buzzer
     -- =========================================================================
-	 signal nota                      : std_logic_vector(3 downto 0);
+	 signal nota                      : std_logic_vector(2 downto 0);
 	 
-	 	 type matrix_8x17 is array (0 to 7) of std_logic_vector(0 to 16);
+	 	 type matrix_8x17 is array (0 to 7) of std_logic_vector(0 to 17);
 	 constant MATRIZ_EXEMPLO1 : matrix_8x17 := (
-    0 => "10000001111111111",
-    1 => "01000001111111111",
-    2 => "00100001111111111",
-    3 => "00010001111111111",
-    4 => "00001001111111111",
-    5 => "00000101111111111",
-    6 => "00000011111111111",
+    0 => "100000010000001011",
+    1 => "010000010000001011",
+    2 => "001000010000001011",
+    3 => "000100010000001011",
+    4 => "000010010000001011",
+    5 => "000001010000001011",
+    6 => "000000110000001011",
     7 => (others => '0')
 );
 	constant MATRIZ_EXEMPLO2 : matrix_8x17  := (
-	 0 => "00000111111111111",
-	 1 => "00001010000000000",
-	 2 => "00010010000000000",
-	 3 => "00010000000110000",
-	 4 => "00100001000000000",
-	 5 => "01000000000000001",
-	 6 => "10000000000000100",
+	 0 => "000000110000001011",
+	 1 => "000001010000001011",
+	 2 => "000010010000001011",
+	 3 => "000100010000001011",
+	 4 => "001000010000001011",
+	 5 => "010000010000001011",
+	 6 => "100000010000001011",
 	 7 => "00000000000000000"
 );
 
@@ -252,12 +252,12 @@ begin
 	--			data => data2
    --    );
 	
-	rgb <= conversao_rgb(data1(16 downto 10)) when tocar1 = '1' else
-			 conversao_rgb(data2(16 downto 10)) when tocar2 = '1' else
+	rgb <= conversao_rgb(data1(17 downto 11)) when tocar1 = '1' else
+			 conversao_rgb(data2(17 downto 11)) when tocar2 = '1' else
 			 "000";
 			 
-	tempo <= data1(9 downto 0) when tocar1 = '1' else
-				data2(9 downto 0) when tocar2 = '1' else
+	tempo <= data1(10 downto 0) when tocar1 = '1' else
+				data2(10 downto 0) when tocar2 = '1' else
 				(others => '0');
 	
 		 -- =========================================================================
@@ -274,8 +274,8 @@ begin
 		buzz_out => buzz
 	 );
 	
-	nota <= conversao_nota(data1(16 downto 10)) when tocar1 = '1' else
-			  conversao_nota(data2(16 downto 10)) when tocar2 = '1' else
+	nota <= conversao_nota(data1(17 downto 11)) when tocar1 = '1' else
+			  conversao_nota(data2(17 downto 11)) when tocar2 = '1' else
 			  (others => '0');
     -- =========================================================================
     -- Medicao de tempo para transicao de nota: cadeia de 4 contadores BCD (0-9)
