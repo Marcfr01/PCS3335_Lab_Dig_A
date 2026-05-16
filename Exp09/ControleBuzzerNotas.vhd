@@ -30,7 +30,7 @@ architecture Comportamento of ControleBuzzerNotas is
     );
 
     signal counter    : integer range 0 to 30000 := 0;
-    signal max_count  : integer range 0 to 30000 := 28409; -- Padrão: Lá 4
+    signal max_count  : integer range 0 to 30000 := 246,94; -- Padrão: B3
     signal toggle_sig : STD_LOGIC := '0';
     
 begin
