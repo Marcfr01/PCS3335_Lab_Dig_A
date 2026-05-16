@@ -329,8 +329,8 @@ begin
 	  data2 <= MATRIZ_EXEMPLO2(to_integer(unsigned(pointer2))) when tocar2 = '1' else
 			 (others => '0');
 			 
-	  nota_atual <= data1(16 downto 10) when tocar1 = '1' else
-                  data2(16 downto 10) when tocar2 = '1' else
+	  nota_atual <= data1(17 downto 11) when tocar1 = '1' else
+                  data2(17 downto 11) when tocar2 = '1' else
                   (others => '0');
  
    --M1 : memoriaMusicas
@@ -355,8 +355,8 @@ begin
 	--			data => data2
    --    );
 	
-	rgb <= conversao_rgb(data1(17 downto 11)) when tocar1 = '1' else
-			 conversao_rgb(data2(17 downto 11)) when tocar2 = '1' else
+	rgb <= conversao_rgb(data1(17 downto 11)) when (tocar1 = '1' and ledar = '1') else
+			 conversao_rgb(data2(17 downto 11)) when (tocar2 = '1' and ledar = '1') else
 			 "000";
 			 
 	tempo <= data1(10 downto 0) when tocar1 = '1' else
@@ -370,7 +370,7 @@ begin
 		 -- =========================================================================
     -- Gerador de PWM: controle do buzzer
     --   Ligado quando led estiver ligado
-	 --   Controle de frequencia dado por nota (data1(16 downto 10))
+	 --   Controle de frequencia dado por nota (data(17 downto 10))
     -- =========================================================================
 	buzzer : ControleBuzzerNotas
 	 port map(
