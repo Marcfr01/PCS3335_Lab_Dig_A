@@ -14,7 +14,7 @@ end ControleBuzzerNotas;
 
 architecture Comportamento of ControleBuzzerNotas is
 
-    type tabela_notas is array (0 to 12) of integer;
+    type tabela_notas is array (0 to 7) of integer;
     
     -- Referencia Frequencia da notas: https://mixbutton.com/music-tools/frequency-and-pitch/music-note-to-frequency-chart
     -- Fórmula: 25.000.000 / Frequência_da_Nota
@@ -29,8 +29,8 @@ architecture Comportamento of ControleBuzzerNotas is
 		  7  => 0	  ,  -- Nada
     );
 
-    signal counter    : integer range 0 to 30000 := 0;
-    signal max_count  : integer range 0 to 30000 := 247; -- Padrão: B3 tinha q ser 246,97 mas inteiro tem q ser inteiro
+    signal counter    : integer range 0 to 300000 := 0;
+    signal max_count  : integer range 0 to 300000 := 247; -- Padrão: B3 tinha q ser 246,97 mas inteiro tem q ser inteiro
     signal toggle_sig : STD_LOGIC := '0';
     
 begin
