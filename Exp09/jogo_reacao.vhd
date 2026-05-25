@@ -16,7 +16,7 @@ entity jogo_reacao is
         ps2_data    : in  std_logic;
 		  
 		  --Saida de pontuacao
-		  pontos      : out std_logic_vector(9 downto 0);
+		  --pontos      : out std_logic_vector(9 downto 0);
  
         -- Saidas originais
         display0    : out std_logic_vector(6 downto 0);
@@ -193,7 +193,7 @@ begin
             display3      => display3,
             rgb           => gbr,
             buzz          => buzz,
-				pontos        => pontos,
+				pontos        => OPEN,
             db_tempo      => open
         );
 		  
