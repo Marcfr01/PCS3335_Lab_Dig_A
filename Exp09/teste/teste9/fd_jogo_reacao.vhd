@@ -13,6 +13,7 @@ entity fd_jogo_reacao is
         reset         : in  std_logic; -- ENTRADA: teclado em logic vector
 													-- SAIDA: buzz, resposta, passou05, teclado em binario (acertou ou nao, entrada pra UC)
 		  
+		  butao         : in std_logic;
 		  -- clock de 50MHz para o buzzer
         clock50       : in  std_logic;
 		  ledar         : in  std_logic;
@@ -49,13 +50,11 @@ entity fd_jogo_reacao is
 		  fim1          : out std_logic;
 		  fim2          : out std_logic;
 		  
-		  -- Resposta do jogador via teclado PS/2
-        -- bit 0=S  bit 1=D  bit 2=F  bit 3=G  bit 4=H  bit 5=J  bit 6=K
-        resposta      : out std_logic_vector(6 downto 0);
+		  
 		  
 		  -- Nota sendo tocada no momento (one-hot, bits 16:10 do dado da ROM)
         -- Usada pela UC para verificar acerto sem acessar a ROM diretamente
-        nota_atual    : out std_logic_vector(6 downto 0);
+        --nota_atual    : out std_logic_vector(6 downto 0);
 		  
         -- Displays de 7 segmentos
         display0      : out std_logic_vector(6 downto 0);
@@ -71,6 +70,8 @@ entity fd_jogo_reacao is
 		  
 		  -- pontuacao do jogador 
 		  pontos       : out std_logic_vector(9 downto 0); -- pode-se depois mudar o maximo de pontos (atual = 1023)
+		  
+		  acertou      : out std_logic;
 
 		  -- sinal de depuracao
         db_tempo      : out std_logic_vector(15 downto 0)
@@ -246,6 +247,10 @@ architecture arch of fd_jogo_reacao is
 	constant acertou_nota_perfeito : unsigned(7 downto 0)	:= "00000010"; -- 2 pontos
 	--constant acertou_nota_paiamente : std_logic_vector(9 downto 0); -- caso colocarmos o perfeito e normal
 	signal pontos_t : unsigned(7 downto 0) := "00000000";
+	-- Resposta do jogador via teclado PS/2
+        -- bit 0=S  bit 1=D  bit 2=F  bit 3=G  bit 4=H  bit 5=J  bit 6=K
+   signal resposta      : std_logic_vector(6 downto 0);
+	signal nota_atual    : std_logic_vector(6 downto 0);
 	
 begin
 
@@ -357,7 +362,7 @@ begin
 	
 	rgb <= conversao_rgb(data1(17 downto 11)) when (tocar1 = '1' and ledar = '1') else
 			 conversao_rgb(data2(17 downto 11)) when (tocar2 = '1' and ledar = '1') else
-			 "111";
+			 "000";
 			 
 	tempo <= data1(10 downto 0) when tocar1 = '1' else
 				data2(10 downto 0) when tocar2 = '1' else
@@ -465,6 +470,7 @@ end process;
     db_tempo <= dig3 & dig2 & dig1 & dig0;
 	 
 	 --pontos <= std_logic_vector(pontos_t);
-
+	 acertou <= '1' when butao = '0' and (tocar1 ='1' or tocar2 = '1') else '0';
+	--acertou <= '1' when (unsigned(resposta) = unsigned(nota_atual)) else '0';
 
 end architecture;
