@@ -1,0 +1,6 @@
+k17 - jogar
+p18 - sel
+r17 - next
+t20 - errou
+t18 - reset
+t15 - retry
