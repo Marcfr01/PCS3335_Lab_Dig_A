@@ -5,7 +5,7 @@ entity jogo_reacao is
     port (
         clock       : in  std_logic;
 		  clock50     : in  std_logic;
-		  butao       : in std_logic;
+		  butao       : in  std_logic_vector(2 downto 0);
         reset       : in  std_logic;
         jogar       : in  std_logic;
         botao_next  : in  std_logic;
@@ -74,7 +74,7 @@ architecture estrutural of jogo_reacao is
         port (
             clock         : in  std_logic;
             reset         : in  std_logic;
-				butao         : in std_logic;
+				butao         : in std_logic_vector(2 downto 0);
 				clock50       : in  std_logic;
 				ledar         : in  std_logic;
 				ps2_clk       : in  std_logic;
