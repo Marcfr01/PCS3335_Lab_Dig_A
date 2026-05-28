@@ -5,6 +5,7 @@ entity jogo_reacao is
     port (
         clock       : in  std_logic;
 		  clock50     : in  std_logic;
+		  butao       : in std_logic;
         reset       : in  std_logic;
         jogar       : in  std_logic;
         botao_next  : in  std_logic;
@@ -47,8 +48,9 @@ architecture estrutural of jogo_reacao is
             fim2          : in  std_logic;
             notou         : in  std_logic;
             passou05      : in  std_logic;
-            resposta      : in  std_logic_vector(6 downto 0);
-            nota_atual    : in  std_logic_vector(6 downto 0);
+            --resposta      : in  std_logic_vector(6 downto 0);
+            --nota_atual    : in  std_logic_vector(6 downto 0);
+				acertou       : in  std_logic;
             incr1         : out std_logic;
             incr2         : out std_logic;
             resetP1       : out std_logic;
@@ -72,6 +74,7 @@ architecture estrutural of jogo_reacao is
         port (
             clock         : in  std_logic;
             reset         : in  std_logic;
+				butao         : in std_logic;
 				clock50       : in  std_logic;
 				ledar         : in  std_logic;
 				ps2_clk       : in  std_logic;
@@ -90,8 +93,9 @@ architecture estrutural of jogo_reacao is
 				passou05      : out std_logic;
 				fim1          : out std_logic;
             fim2          : out std_logic;
-            resposta      : out std_logic_vector(6 downto 0);
-            nota_atual    : out std_logic_vector(6 downto 0);
+            --resposta      : out std_logic_vector(6 downto 0);
+            --nota_atual    : out std_logic_vector(6 downto 0);
+				acertou       :out std_logic;
             display0      : out std_logic_vector(6 downto 0);
             display1      : out std_logic_vector(6 downto 0);
             display2      : out std_logic_vector(6 downto 0);
@@ -137,10 +141,11 @@ end component;
     signal s_passou05                : std_logic := '0';  -- TODO: ligar a contador de 500ms
  
     -- Teclado PS/2
-    signal s_resposta   : std_logic_vector(6 downto 0);
+    --signal s_resposta   : std_logic_vector(6 downto 0);
  
     -- Nota sendo tocada (one-hot, extraida do FD)
-    signal s_nota_atual : std_logic_vector(6 downto 0);
+    --signal s_nota_atual : std_logic_vector(6 downto 0);
+	 signal s_acertou    : std_logic;
 
 begin
 
@@ -156,8 +161,9 @@ begin
             fim2          => s_fim2,
             notou         => s_notou,
             passou05      => s_passou05,
-            resposta      => s_resposta,
-            nota_atual    => s_nota_atual,
+            --resposta      => s_resposta,
+            --nota_atual    => s_nota_atual,
+				acertou       => s_acertou,
             incr1         => s_incr1,
             incr2         => s_incr2,
             resetP1       => s_resetP1,
@@ -180,6 +186,7 @@ begin
         port map (
             clock         => clock,
             reset         => reset,
+				butao      => butao,
 				clock50       => clock50,
 				ledar         => s_ledar,
             ps2_clk       => ps2_clk,
@@ -198,8 +205,9 @@ begin
 				passou05      => s_passou05,
             fim1          => s_fim1,
             fim2          => s_fim2,
-            resposta      => s_resposta,
-            nota_atual    => s_nota_atual,
+				acertou       => s_acertou,
+            --resposta      => s_resposta,
+            --nota_atual    => s_nota_atual,
             display0      => display0,
             display1      => display1,
             display2      => display2,
