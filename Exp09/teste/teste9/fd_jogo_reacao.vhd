@@ -13,7 +13,7 @@ entity fd_jogo_reacao is
         reset         : in  std_logic; -- ENTRADA: teclado em logic vector
 													-- SAIDA: buzz, resposta, passou05, teclado em binario (acertou ou nao, entrada pra UC)
 		  
-		  butao         : in std_logic;
+		  butao         : in std_logic_vector(2 downto 0);
 		  -- clock de 50MHz para o buzzer
         clock50       : in  std_logic;
 		  ledar         : in  std_logic;
@@ -173,14 +173,14 @@ architecture arch of fd_jogo_reacao is
         return std_logic_vector is
     begin
         case data is
-            when "1000000" => return "000"; -- A4
-            when "0100000" => return "001"; -- B4
-            when "0010000" => return "010"; -- C5
-            when "0001000" => return "011"; -- D5
-            when "0000100" => return "100"; -- E5
-            when "0000010" => return "101"; -- F5
-            when "0000001" => return "110"; -- G5
-            when others    => return "111"; -- 0
+            when "1000000" => return "001"; -- A4
+            when "0100000" => return "010"; -- B4
+            when "0010000" => return "011"; -- C5
+            when "0001000" => return "100"; -- D5
+            when "0000100" => return "101"; -- E5
+            when "0000010" => return "110"; -- F5
+            when "0000001" => return "111"; -- G5
+            when others    => return "000"; -- 0
         end case;
     end function;
     -- =========================================================================
@@ -251,6 +251,7 @@ architecture arch of fd_jogo_reacao is
         -- bit 0=S  bit 1=D  bit 2=F  bit 3=G  bit 4=H  bit 5=J  bit 6=K
    signal resposta      : std_logic_vector(6 downto 0);
 	signal nota_atual    : std_logic_vector(6 downto 0);
+	signal nao_butao     : std_logic_vector(2 downto 0);
 	
 begin
 
@@ -402,6 +403,7 @@ end process;
 	 nota <= conversao_nota(data1(17 downto 11)) when tocar1 = '1' else
 			   conversao_nota(data2(17 downto 11)) when tocar2 = '1' else
 			   (others => '0');
+	
     -- =========================================================================
     -- Medicao de tempo para transicao de nota: cadeia de 4 contadores BCD (0-9)
     --   Resolucao: 1 ms (clock de 1 kHz)
@@ -469,8 +471,9 @@ end process;
 
     db_tempo <= dig3 & dig2 & dig1 & dig0;
 	 
+	 nao_butao <= not(butao);
 	 --pontos <= std_logic_vector(pontos_t);
-	 acertou <= '1' when butao = '0' and (tocar1 ='1' or tocar2 = '1') else '0';
-	--acertou <= '1' when (unsigned(resposta) = unsigned(nota_atual)) else '0';
+	 --acertou <= '1' when butao = '0' and (tocar1 ='1' or tocar2 = '1') else '0';
+	acertou <= '1' when (unsigned(nao_butao) = unsigned(nota)) else '0';
 
 end architecture;
