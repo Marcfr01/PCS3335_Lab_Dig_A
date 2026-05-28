@@ -1,9 +1,8 @@
-k17 - jogar
-p18 - sel
-r17 - next
-t20 - errou
-t18 - reset
-t15 - retry
-
+k17 - jogar - 15
+p18 - sel - 1
+r17 - next - 2
+t20 - errou - 3
+t18 - reset - 4
+t15 - retry - 5
 
 buzzer => a13
